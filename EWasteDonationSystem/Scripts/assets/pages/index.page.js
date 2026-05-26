@@ -1,0 +1,5 @@
+/* Documented for easier understanding. */
+const s = Store.get();
+    document.getElementById("kpiDonors").textContent = s.donors.length;
+    document.getElementById("kpiStudents").textContent = s.students.length;
+    document.getElementById("kpiAgents").textContent = s.agents.length;

@@ -1,0 +1,80 @@
+@* Documented for easier understanding. *@
+@using System.Web.Optimization
+@using System.Web.Script.Serialization
+@{
+    var toastSerializer = new JavaScriptSerializer();
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render("~/Content/css")
+</head>
+<body>
+    <div id="globalToast" class="global-toast" aria-live="polite" aria-atomic="true"></div>
+    @RenderBody()
+
+    @Scripts.Render("~/bundles/app")
+    @RenderSection("scripts", required: false)
+    <script>
+        (function () {
+            var toast = document.getElementById('globalToast');
+            if (!toast) return;
+
+            function showToast(type, text) {
+                if (!text) return;
+                toast.className = 'global-toast show ' + (type || 'success');
+                toast.textContent = text;
+                window.setTimeout(function () {
+                    toast.className = 'global-toast';
+                }, 2600);
+            }
+
+            var successMessage = @Html.Raw(toastSerializer.Serialize(TempData["Success"] != null ? Convert.ToString(TempData["Success"]) : string.Empty));
+            var errorMessage = @Html.Raw(toastSerializer.Serialize(TempData["Error"] != null ? Convert.ToString(TempData["Error"]) : string.Empty));
+
+            if (errorMessage) {
+                showToast('error', errorMessage);
+            } else if (successMessage) {
+                showToast('success', successMessage);
+            }
+        })();
+    </script>
+    <style>
+        .global-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            z-index: 9999;
+            min-width: 240px;
+            max-width: 380px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #fff;
+            text-align: center;
+            font-weight: 700;
+            opacity: 0;
+            transform: translate(-50%, -56%);
+            transition: opacity .2s ease, transform .2s ease;
+            box-shadow: 0 10px 28px rgba(0,0,0,.22);
+            pointer-events: none;
+        }
+
+        .global-toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+        }
+
+        .global-toast.success {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+
+        .global-toast.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+    </style>
+</body>
+</html>

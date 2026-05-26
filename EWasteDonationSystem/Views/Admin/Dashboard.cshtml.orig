@@ -1,0 +1,327 @@
+@model EWasteDonationSystem.Models.AdminDashboardVm
+@using EWasteDonationSystem.Models
+@{
+    ViewBag.Title = "Admin Dashboard";
+    var donorItemsLookup = Model.DonationItems
+        .Where(i => i.DonorId > 0)
+        .GroupBy(i => i.DonorId)
+        .ToDictionary(g => g.Key, g => g.FirstOrDefault());
+    var studentAppsLookup = Model.StudentApplications
+        .Where(a => a.StudentId > 0)
+        .GroupBy(a => a.StudentId)
+        .ToDictionary(g => g.Key, g => g.FirstOrDefault());
+}
+
+<div class="container admin-lite-page">
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo"><img src="@Url.Content("~/Content/images/AdminLogo.jpeg")" alt="Logo" loading="lazy" /></div>
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Fast loading view for approve/reject, pickup team and admin chat preview.</p>
+            </div>
+        </div>
+        <div class="nav">
+            <a class="chip" href="@Url.Action("Logout", "Account", new { role = "admin" })">Logout Admin</a>
+            <a class="chip" href="@Url.Action("ChooseRole", "Home")">Choose Role</a>
+            <a class="chip" href="@Url.Action("Index", "Home")">Home</a>
+            <span class="chip">Admin: Super Admin</span>
+        </div>
+    </div>
+
+    <div class="hero admin-lite-hero" style="margin-top:18px; align-items:center;">
+        <div>
+            <h2>Admin Control Panel</h2>
+            <p>
+                This page is adjusted to open faster. It shows recent donors and students first,
+                while keeping the same admin dashboard style from your screenshots.
+            </p>
+            <div class="hr"></div>
+            <div class="btnrow">
+                <a class="btn ghost" href="@Url.Action("Dashboard", "Donor")">Open Donor Page</a>
+                <a class="btn ghost" href="@Url.Action("Dashboard", "Student")">Open Students Page</a>
+                <a class="btn primary" href="@Url.Action("Dashboard", "Admin")">Refresh Data</a>
+            </div>
+        </div>
+        <div class="heroart admin-heroart">
+            <img src="@Url.Content("~/Content/images/AdminBanner.jpeg")" alt="Admin Banner" loading="lazy" />
+        </div>
+    </div>
+
+    <div class="admin-stats-grid" style="margin-top:18px;">
+        <div class="kpi"><div class="label">Total Donors</div><div class="value">@Model.TotalDonors</div></div>
+        <div class="kpi"><div class="label">Total Students</div><div class="value">@Model.TotalStudents</div></div>
+        <div class="kpi"><div class="label">Pending Donors</div><div class="value">@Model.PendingDonors</div></div>
+        <div class="kpi"><div class="label">Pending Students</div><div class="value">@Model.PendingStudents</div></div>
+        <div class="kpi"><div class="label">Pickup Assignments</div><div class="value">@Model.TotalPickupAssignments</div></div>
+    </div>
+
+    <div class="grid admin-main-grid">
+        <div class="card">
+            <div class="head">
+                <h3>Donors List (Approve/Reject)</h3>
+                <p>Showing latest @Model.RecentDonorCount donors for faster opening.</p>
+            </div>
+            <div class="body admin-table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Donor</th>
+                            <th>Item</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Donors.Any())
+                        {
+                            <tr><td colspan="5">No donors found yet.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var d in Model.Donors)
+                            {
+                                var item = donorItemsLookup.ContainsKey(d.Id) ? donorItemsLookup[d.Id] : null;
+                                var badgeClass = d.Status == ApprovalStatus.Approved ? "badge ok" : d.Status == ApprovalStatus.Rejected ? "badge bad" : "badge warn";
+                                <tr>
+                                    <td>
+                                        <strong>@d.FullName</strong><br />
+                                        <span class="small">DNR-@d.Id.ToString("000000")</span><br />
+                                        <span class="small">@(string.IsNullOrWhiteSpace(d.City) ? d.Email : d.City)</span>
+                                    </td>
+                                    <td>@(item != null ? item.ItemName + " (x" + item.Quantity + ")" : "—")</td>
+                                    <td><span class="@badgeClass">@d.Status</span></td>
+                                    <td>
+                                        <div class="btnrow admin-action-stack">
+                                            @using (Html.BeginForm("SetDonorStatus", "Admin", FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@d.Id" />
+                                                <input type="hidden" name="status" value="Approved" />
+                                                <button class="btn ok" type="submit">Approve</button>
+                                            }
+                                            @using (Html.BeginForm("SetDonorStatus", "Admin", FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@d.Id" />
+                                                <input type="hidden" name="status" value="Rejected" />
+                                                <button class="btn warn" type="submit">Reject</button>
+                                            }
+                                            @using (Html.BeginForm("SetDonorStatus", "Admin", FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@d.Id" />
+                                                <input type="hidden" name="status" value="Pending" />
+                                                <button class="btn ghost" type="submit">Pending</button>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td><a class="btn" href="@Url.Action("DonorDetail", "Admin", new { id = d.Id })">Open</a></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="head">
+                <h3>Students/Needy List (Approve/Reject)</h3>
+                <p>Showing latest @Model.RecentStudentCount students for faster opening.</p>
+            </div>
+            <div class="body admin-table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Applicant</th>
+                            <th>Needed</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Students.Any())
+                        {
+                            <tr><td colspan="5">No students found yet.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var s in Model.Students)
+                            {
+                                var app = studentAppsLookup.ContainsKey(s.Id) ? studentAppsLookup[s.Id] : null;
+                                var badgeClass = s.Status == ApprovalStatus.Approved ? "badge ok" : s.Status == ApprovalStatus.Rejected ? "badge bad" : "badge warn";
+                                <tr>
+                                    <td>
+                                        <strong>@s.FullName</strong><br />
+                                        <span class="small">STD-@s.Id.ToString("000000")</span><br />
+                                        <span class="small">@(string.IsNullOrWhiteSpace(s.City) ? s.Email : s.City)</span>
+                                    </td>
+                                    <td>@(app != null ? app.ItemsNeeded : "—")</td>
+                                    <td><span class="@badgeClass">@s.Status</span></td>
+                                    <td>
+                                        <div class="btnrow admin-action-stack">
+                                            @using (Html.BeginForm("SetStudentStatus", "Admin", FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@s.Id" />
+                                                <input type="hidden" name="status" value="Approved" />
+                                                <button class="btn ok" type="submit">Approve</button>
+                                            }
+                                            @using (Html.BeginForm("SetStudentStatus", "Admin", FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@s.Id" />
+                                                <input type="hidden" name="status" value="Rejected" />
+                                                <button class="btn warn" type="submit">Reject</button>
+                                            }
+                                            @using (Html.BeginForm("SetStudentStatus", "Admin", FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@s.Id" />
+                                                <input type="hidden" name="status" value="Pending" />
+                                                <button class="btn ghost" type="submit">Pending</button>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td><a class="btn" href="@Url.Action("StudentDetail", "Admin", new { id = s.Id })">Open</a></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="split" style="margin-top:18px; align-items:start;">
+        <div class="card">
+            <div class="head">
+                <h3>Pickup Agent Team</h3>
+                <p>Same admin section with a lighter and cleaner layout.</p>
+            </div>
+            <div class="body">
+                <div class="form">
+                    <div class="field"><label>Agent Name / Team</label><input class="input" placeholder="e.g., Pickup Team C - Ali" /></div>
+                    <div class="field"><label>Phone</label><input class="input" placeholder="+92 3xx xxxxxxx" /></div>
+                    <div class="field full"><label>Area / City</label><input class="input" placeholder="e.g., Karachi (North Nazimabad)" /></div>
+                </div>
+                <div class="hr"></div>
+                <button class="btn primary" type="button">Add Agent</button>
+                <div class="hr"></div>
+                <table class="table">
+                    <thead><tr><th>Agent</th><th>Phone</th><th>Area</th></tr></thead>
+                    <tbody>
+                        @foreach (var agent in Model.PickupAgents)
+                        {
+                            <tr>
+                                <td><strong>@agent.AgentName</strong><br /><span class="small">@agent.AgentCode</span></td>
+                                <td>@agent.Phone</td>
+                                <td>@agent.Area</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="head">
+                <h3>Assign Pickup Agent (Admin)</h3>
+                <p>Quick assignment area kept in the same style as your images.</p>
+            </div>
+            <div class="body">
+                <div class="form">
+                    <div class="field full">
+                        <label>Donor</label>
+                        <select class="input">
+                            @if (Model.Donors.Any())
+                            {
+                                foreach (var donor in Model.Donors)
+                                {
+                                    <option>@donor.FullName (DNR-@donor.Id.ToString("000000"))</option>
+                                }
+                            }
+                            else
+                            {
+                                <option>No donors yet</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="field full">
+                        <label>Pickup Agent</label>
+                        <select class="input">
+                            @foreach (var agent in Model.PickupAgents)
+                            {
+                                <option>@agent.AgentName (@agent.Area)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="hr"></div>
+                <div class="btnrow">
+                    <button class="btn" type="button">Assign</button>
+                    <button class="btn ghost" type="button">Clear Assignment</button>
+                </div>
+                <div class="hr"></div>
+                <table class="table">
+                    <thead><tr><th>Donor</th><th>Agent</th><th>Assigned At</th></tr></thead>
+                    <tbody>
+                        <tr><td colspan="3">No pickup assignments yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat" style="margin-top:18px;">
+        <div class="head">
+            <div class="flex"><span class="badge">Admin Chat</span><span class="small">Preview messages only for fast loading</span></div>
+        </div>
+        <div class="body" style="padding:18px;">
+            <div class="form">
+                <div class="field full">
+                    <label>Chat Target</label>
+                    <select class="input">
+                        <option @(Model.SelectedChatTarget == "Donor" ? "selected" : "")>Donor</option>
+                        <option @(Model.SelectedChatTarget == "Student" ? "selected" : "")>Student</option>
+                    </select>
+                </div>
+                <div class="field full">
+                    <label>Select Person</label>
+                    <select class="input">
+                        <option>@Model.SelectedChatPerson</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="chat" style="margin-top:16px; box-shadow:none; background:rgba(15,23,42,.015);">
+                <div class="msgs">
+                    @if (!Model.PreviewMessages.Any())
+                    {
+                        <div class="bubble them">No messages yet.</div>
+                    }
+                    else
+                    {
+                        foreach (var msg in Model.PreviewMessages)
+                        {
+                            var cls = msg.SenderRole == "Admin" ? "bubble me" : "bubble them";
+                            <div class="@cls">
+                                <div>@msg.Message</div>
+                                <div class="small" style="margin-top:4px;">@msg.SentAtUtc.ToLocalTime().ToString("g")</div>
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="send">
+                    <input class="input" placeholder="Type admin message..." />
+                    <button class="btn primary" type="button">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">Admin UI — adjusted for quicker loading and cleaner dashboard display.</div>
+</div>

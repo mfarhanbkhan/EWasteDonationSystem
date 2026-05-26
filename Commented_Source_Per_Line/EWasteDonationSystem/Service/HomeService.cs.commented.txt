@@ -1,0 +1,49 @@
+// using System.Linq;
+// using EWasteDonationSystem.Models;
+
+// namespace EWasteDonationSystem.Service
+// {
+//     /// <summary>
+//     /// Supplies lightweight data for public pages such as counts and defaults.
+//     /// </summary>
+//     public class HomeService
+//     {
+//         private readonly AppDbContext _db;
+
+//         public HomeService(AppDbContext db)
+//         {
+//             _db = db;
+//         }
+
+//         public HomeStatsVm GetIndexStats()
+//         {
+//             return new HomeStatsVm
+//             {
+//                 DonorCount = _db.Donors.Count(),
+//                 StudentCount = _db.Students.Count(),
+//                 ItemCount = _db.DonationItems.Count()
+//             };
+//         }
+
+//         public HomeStatsVm GetChooseRoleStats()
+//         {
+//             return new HomeStatsVm
+//             {
+//                 DonorCount = _db.Donors.Count(),
+//                 StudentCount = _db.Students.Count(),
+//                 PendingItems = _db.DonationItems.Count()
+//             };
+//         }
+//     }
+
+//     /// <summary>
+//     /// Small DTO used to send summary counts back to the controller.
+//     /// </summary>
+//     public class HomeStatsVm
+//     {
+//         public int DonorCount { get; set; }
+//         public int StudentCount { get; set; }
+//         public int ItemCount { get; set; }
+//         public int PendingItems { get; set; }
+//     }
+// }

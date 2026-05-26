@@ -1,0 +1,45 @@
+// Project documentation note: This file contains commented code for easier understanding.
+using System.Web.Mvc;
+using System.Web.Routing;
+
+namespace EWasteDonationSystem
+{
+    public class RouteConfig
+    {
+        public static void RegisterRoutes(RouteCollection routes)
+        {
+            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+
+            // Friendly URLs
+            routes.MapRoute(
+                name: "ChooseRole",
+                url: "choose-role",
+                defaults: new { controller = "Home", action = "ChooseRole" }
+            );
+
+            routes.MapRoute(
+                name: "Admin",
+                url: "admin",
+                defaults: new { controller = "Admin", action = "Dashboard" }
+            );
+
+            routes.MapRoute(
+                name: "Donor",
+                url: "donor/{action}/{id}",
+                defaults: new { controller = "Donor", action = "Dashboard", id = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
+                name: "Student",
+                url: "student/{action}/{id}",
+                defaults: new { controller = "Student", action = "Dashboard", id = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
+                name: "Default",
+                url: "{controller}/{action}/{id}",
+                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+            );
+        }
+    }
+}

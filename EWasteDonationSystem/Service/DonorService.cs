@@ -1,0 +1,194 @@
+// Project documentation note: This file contains commented code for easier understanding.
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Web;
+using EWasteDonationSystem.Models;
+
+namespace EWasteDonationSystem.Service
+{
+    /// <summary>
+    /// Handles donor business logic, data loading, and message actions.
+    /// </summary>
+    public class DonorService
+    {
+        private readonly AppDbContext _db;
+
+        public DonorService(AppDbContext db)
+        {
+            _db = db;
+        }
+
+        public DonorDashboardVm BuildDashboard(HttpSessionStateBase session, int? id)
+        {
+            var vm = new DonorDashboardVm();
+            vm.Donors = _db.Donors.OrderByDescending(x => x.Id).ToList();
+
+            if (!id.HasValue && session["DonorId"] != null)
+            {
+                id = (int)session["DonorId"];
+            }
+            else if (!id.HasValue && session["AdminLoggedIn"] is bool && (bool)session["AdminLoggedIn"])
+            {
+                var latestDonor = vm.Donors.FirstOrDefault();
+                if (latestDonor != null) id = latestDonor.Id;
+            }
+
+            if (id.HasValue)
+            {
+                vm.Donor = _db.Donors.Find(id.Value) ?? new Donor();
+                var hiddenMessageIds = GetHiddenMessageIds(session, id.Value);
+                vm.Chat = _db.ChatMessages.Where(m => m.DonorId == id.Value && !hiddenMessageIds.Contains(m.Id)).OrderBy(m => m.SentAtUtc).ToList();
+                vm.LatestItems = _db.DonationItems.Where(i => i.DonorId == id.Value).OrderByDescending(i => i.Id).Take(20).ToList();
+                vm.DonationItem.DonorId = id.Value;
+            }
+
+            return vm;
+        }
+
+        public Donor GetDetail(HttpSessionStateBase session, int? id)
+        {
+            if (!id.HasValue && session["DonorId"] != null)
+            {
+                id = (int)session["DonorId"];
+            }
+            if (!id.HasValue) return null;
+
+            var donor = _db.Donors.Find(id.Value);
+            if (donor == null) return null;
+            donor.DonationItems = _db.DonationItems.Where(x => x.DonorId == donor.Id).OrderByDescending(x => x.Id).ToList();
+            donor.ChatMessages = _db.ChatMessages.Where(x => x.DonorId == donor.Id).OrderBy(x => x.SentAtUtc).ToList();
+            return donor;
+        }
+
+        public bool SaveProfile(HttpSessionStateBase session, Donor donor, out int donorId, out string message)
+        {
+            donorId = session["DonorId"] == null ? 0 : (int)session["DonorId"];
+            if (donorId == 0)
+            {
+                message = "Please login as donor first.";
+                return false;
+            }
+
+            var existing = _db.Donors.Find(donorId);
+            if (existing == null)
+            {
+                message = "Donor not found.";
+                return false;
+            }
+
+            existing.FullName = donor.FullName;
+            existing.Phone = donor.Phone;
+            existing.Email = donor.Email;
+            existing.City = donor.City;
+            existing.Address = donor.Address;
+            session["DonorName"] = donor.FullName;
+            _db.SaveChanges();
+            message = null;
+            return true;
+        }
+
+        public bool PostDonation(HttpSessionStateBase session, HttpServerUtilityBase server, DonorDashboardVm vm, HttpPostedFileBase itemImage, out int donorId, out string message)
+        {
+            donorId = session["DonorId"] == null ? 0 : (int)session["DonorId"];
+            if (donorId == 0)
+            {
+                message = "Please login as donor first.";
+                return false;
+            }
+
+            var donor = _db.Donors.Find(donorId);
+            if (donor == null)
+            {
+                message = "Donor record was not found.";
+                return false;
+            }
+
+            if (vm != null && vm.Donor != null)
+            {
+                donor.FullName = string.IsNullOrWhiteSpace(vm.Donor.FullName) ? donor.FullName : vm.Donor.FullName.Trim();
+                donor.Phone = vm.Donor.Phone;
+                donor.Email = vm.Donor.Email;
+                donor.City = vm.Donor.City;
+                donor.Address = vm.Donor.Address;
+                session["DonorName"] = donor.FullName;
+            }
+
+            var item = vm != null ? vm.DonationItem : null;
+            if (item == null || string.IsNullOrWhiteSpace(item.ItemName))
+            {
+                message = "Item name is required.";
+                return false;
+            }
+
+            item.DonorId = donorId;
+            if (item.Quantity < 1) item.Quantity = 1;
+
+            if (itemImage != null && itemImage.ContentLength > 0)
+            {
+                var uploadsDir = server.MapPath("~/Content/uploads");
+                Directory.CreateDirectory(uploadsDir);
+                var safeFile = Path.GetFileName(itemImage.FileName);
+                var fileName = string.Format("{0:N}_{1}", Guid.NewGuid(), safeFile);
+                var fullPath = Path.Combine(uploadsDir, fileName);
+                itemImage.SaveAs(fullPath);
+                item.ImagePath = VirtualPathUtility.ToAbsolute("~/Content/uploads/" + fileName);
+            }
+
+            item.CreatedAtUtc = DateTime.UtcNow;
+            _db.DonationItems.Add(item);
+            _db.SaveChanges();
+            message = "Donation item submitted successfully.";
+            return true;
+        }
+
+        public bool DeleteMessageForMe(HttpSessionStateBase session, int messageId, out int donorId)
+        {
+            donorId = session["DonorId"] == null ? 0 : (int)session["DonorId"];
+            if (donorId == 0) return false;
+            var currentDonorId = donorId;
+            var message = _db.ChatMessages.FirstOrDefault(m => m.Id == messageId && m.DonorId == currentDonorId);
+            if (message == null) return true;
+            var hiddenIds = GetHiddenMessageIds(session, donorId);
+            hiddenIds.Add(messageId);
+            session["DonorHiddenChatMessageIds_" + donorId] = hiddenIds;
+            return true;
+        }
+
+        public bool DeleteMessageForEveryone(HttpSessionStateBase session, int messageId, out int donorId)
+        {
+            donorId = session["DonorId"] == null ? 0 : (int)session["DonorId"];
+            if (donorId == 0) return false;
+            var currentDonorId = donorId;
+            var message = _db.ChatMessages.FirstOrDefault(m => m.Id == messageId && m.DonorId == currentDonorId && m.SenderRole == "Donor");
+            if (message != null)
+            {
+                _db.ChatMessages.Remove(message);
+                _db.SaveChanges();
+            }
+            return true;
+        }
+
+        public bool SendMessage(HttpSessionStateBase session, string messageText, out int donorId)
+        {
+            donorId = session["DonorId"] == null ? 0 : (int)session["DonorId"];
+            if (donorId == 0 || string.IsNullOrWhiteSpace(messageText)) return false;
+            _db.ChatMessages.Add(new ChatMessage { DonorId = donorId, SenderRole = "Donor", Message = messageText.Trim(), SentAtUtc = DateTime.UtcNow });
+            _db.SaveChanges();
+            return true;
+        }
+
+        private HashSet<int> GetHiddenMessageIds(HttpSessionStateBase session, int donorId)
+        {
+            var key = "DonorHiddenChatMessageIds_" + donorId;
+            var ids = session[key] as HashSet<int>;
+            if (ids == null)
+            {
+                ids = new HashSet<int>();
+                session[key] = ids;
+            }
+            return ids;
+        }
+    }
+}

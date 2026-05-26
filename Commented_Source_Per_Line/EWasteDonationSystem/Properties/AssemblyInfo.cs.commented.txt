@@ -1,0 +1,19 @@
+// // Project documentation note: This file contains commented code for easier understanding.
+// using System.Reflection;
+// using System.Runtime.InteropServices;
+
+// [assembly: AssemblyTitle("EWasteDonationSystem")]
+// [assembly: AssemblyDescription("E-Waste Pickup and Donations system (MVC5 + EF6 Code First)")]
+// [assembly: AssemblyConfiguration("")]
+// [assembly: AssemblyCompany("")]
+// [assembly: AssemblyProduct("EWasteDonationSystem")]
+// [assembly: AssemblyCopyright("")]
+// [assembly: AssemblyTrademark("")]
+// [assembly: AssemblyCulture("")]
+
+// [assembly: ComVisible(false)]
+
+// [assembly: Guid("d1e56541-0db5-4c66-ae7a-b1c3a64c3c1d")]
+
+// [assembly: AssemblyVersion("1.0.0.0")]
+// [assembly: AssemblyFileVersion("1.0.0.0")]

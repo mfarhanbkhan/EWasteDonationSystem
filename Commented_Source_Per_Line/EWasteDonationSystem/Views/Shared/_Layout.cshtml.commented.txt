@@ -1,0 +1,18 @@
+@* @* Documented for easier understanding. * @ *@
+@* @using System.Web.Optimization *@
+@* <!doctype html> *@
+@* <html lang="en"> *@
+@* <head> *@
+@*     <meta charset="utf-8" /> *@
+@*     <meta name="viewport" content="width=device-width,initial-scale=1" /> *@
+@*     <title>@ViewBag.Title</title> *@
+
+@*     @Styles.Render("~/Content/css") *@
+@* </head> *@
+@* <body> *@
+@*     @RenderBody() *@
+
+@*     @Scripts.Render("~/bundles/app") *@
+@*     @RenderSection("scripts", required: false) *@
+@* </body> *@
+@* </html> *@

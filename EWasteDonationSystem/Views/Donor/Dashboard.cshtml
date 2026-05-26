@@ -1,0 +1,528 @@
+@* Documented for easier understanding. *@
+@model EWasteDonationSystem.Models.DonorDashboardVm
+@using EWasteDonationSystem.Models
+@using System.Linq
+@{
+    ViewBag.Title = "Donor Dashboard";
+    var donorVm = Model ?? new DonorDashboardVm();
+    var donorProfile = donorVm.Donor ?? new Donor();
+    var activeId = donorProfile.Id;
+    var isLoggedIn = Session["DonorId"] != null;
+    var donorName = !string.IsNullOrWhiteSpace(donorProfile.FullName) ? donorProfile.FullName : (Session["DonorName"] as string ?? "Donor");
+    var donorEmail = !string.IsNullOrWhiteSpace(donorProfile.Email) ? donorProfile.Email : (Session["DonorEmail"] as string ?? "");
+    var donorStatusClass = donorProfile.Status == ApprovalStatus.Approved ? "ok" : (donorProfile.Status == ApprovalStatus.Rejected ? "bad" : "warn");
+    var isAdminView = Session["AdminLoggedIn"] is bool && (bool)Session["AdminLoggedIn"];
+}
+
+<div class="container dashboard-page">
+    <div class="topbar slim-topbar">
+        <div class="brand">
+            <div class="logo"><img src="@Url.Content("~/Content/images/DonorLogo.jpeg")" alt="Logo" /></div>
+            <div>
+                <h1>Donor Dashboard</h1>
+                <p>Update donor profile, submit donation item and chat with admin.</p>
+            </div>
+        </div>
+        <div class="nav">
+            @if (isAdminView)
+            {
+                <span style="color: #666; margin-right: 16px;">Email: <strong>@donorEmail</strong></span>
+                <a class="chip" href="@Url.Action("Dashboard", "Admin")">Back To Admin</a>
+                <a class="chip" href="@Url.Action("Index", "Home")">Home</a>
+            }
+            else
+            {
+                <span style="color: #666; margin-right: 16px;">Email: <strong>@donorEmail</strong></span>
+                <a class="chip" href="@Url.Action("Index", "Home")">Home</a>
+                <a class="chip" href="@Url.Action("Logout", "Account", new { role = "donor" })">Logout</a>
+            }
+        </div>
+    </div>
+
+    <div class="dashboard-banner donor-theme" style="padding:0;overflow:hidden;">
+        <img src="@Url.Content("~/Content/images/DonorBanner.jpeg")" alt="Donor Banner" style="width:100%;display:block;max-height:220px;object-fit:cover;" />
+    </div>
+
+    <div class="dashboard-grid two-col donor-custom-layout" style="margin-top:20px; gap:24px;">
+        <div class="card" style="grid-column:1 / -1; margin-bottom:10px;">
+            @if (!isAdminView)
+            {
+                <div class="head">
+                    <h3 style="font-weight:800;">Donations Form</h3>
+                    <p>Fill donor information and donation item details below.</p>
+                    <div style="height:8px;"></div>
+                </div>
+
+
+                using (Html.BeginForm("PostDonation", "Donor", FormMethod.Post, new { enctype = "multipart/form-data", data_ajax_form = "true", @class = "client-validate-form" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    @*<div class="form-grid two-col donor-form-grid" style="max-width:980px; margin:0 auto; padding:12px 34px 26px; row-gap:20px; column-gap:28px;">*@
+                    <div class="form-grid two-col donor-form-grid" style=" max-width: 980px; margin: 0 auto; padding: 12px 34px 26px; display: grid; grid-template-columns: repeat(3, 1fr); row-gap: 20px; column-gap: 28px;">
+                        <div class="field">
+                            <label style="font-weight:700;">Donor Name</label>
+                            <input class="input" type="text" name="Donor.FullName" value="" placeholder="Enter donor name" required data-label="Donor Name" />
+                        </div>
+
+                        <div class="field">
+                            <label style="font-weight:700;">Phone</label>
+                            <input class="input" type="text" name="Donor.Phone" value="" placeholder="Enter phone number" required data-label="Phone" />
+                        </div>
+                        <div class="field">
+                            <label style="font-weight:700;">Email</label>
+                            <input class="input" type="email" name="Donor.Email" value="" placeholder="Enter email address" required data-label="Email" />
+                        </div>
+                        <div class="field">
+                            <label style="font-weight:700;">City</label>
+                            <input class="input" type="text" name="Donor.City" value="" placeholder="Enter city" required data-label="City" />
+                        </div>
+                        <div class="field">
+                            <label style="font-weight:700;">Address</label>
+                            <input class="input" type="text" name="Donor.Address" value="" placeholder="Street / Area / City" required data-label="Address" />
+                        </div>
+
+                        @*<div class="field">
+                        <label style="font-weight:700;">Pick Address on Map</label>
+                        <input id="deliveryAddress" class="input" type="text" placeholder="Select address manually" />
+                        <button type="button" onclick="goToCurrentLocation()" style="padding:6px 12px; margin-top:4px;">Use My Current Location</button>
+                        <div id="map" style="height: 300px; margin-top:10px;"></div>
+                    </div>*@
+
+                        <div class="field">
+                            <label style="font-weight:700;">Item Name</label>
+                            <input class="input" type="text" name="DonationItem.ItemName" value="" placeholder="Old laptop, smartphone, router..." required data-label="Item Name" />
+                        </div>
+                        <div class="field">
+                            <label style="font-weight:700;">Quantity</label>
+                            <input class="input" type="number" min="1" name="DonationItem.Quantity" value="" placeholder="1" required data-label="Quantity" />
+                        </div>
+
+                        <div class="field">
+                            <label style="font-weight:700;">Price</label>
+                            <input class="input" type="number" min="1" name="DonationItem.Price" value="" placeholder="1" required data-label="Price" />
+                        </div>
+
+                        <div class="field">
+                            <label style="font-weight:700;">Category</label>
+                            <select class="input" name="DonationItem.Category" required data-label="Category">
+                                <option value="">Select Category</option>
+                                <option value="Laptop">Laptop </option>
+                                <option value="Smartphone">Smartphone </option>
+                                <option value="Power Bank">Power Bank</option>
+                                <option value="Headphones">Headphones </option>
+                                <option value="Printer">Printer </option>
+                                <option value="Study Lamp">Study Lamp</option>
+                                <option value="Wi-Fi Router">Wi-Fi Router</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label style="font-weight:700;">Condition</label>
+                            <select class="input" name="DonationItem.Condition" required data-label="Condition">
+                                <option value="">Select Condition</option>
+                                <option value="New">New</option>
+                                <option value="Used-Like New">Used-Like New</option>
+                                <option value="Used-Good">Used-Good</option>
+                                <option value="Used-Fair">Used-Fair</option>
+                            </select>
+                        </div>
+                        <div class="field full">
+                            <label style="font-weight:700;">Item Image</label>
+                            <input class="input" name="itemImage" type="file" accept="image/*" />
+                        </div>
+                        <div class="field full">
+                            <label style="font-weight:700;">Item Detail</label>
+                            <textarea class="input" rows="5" name="DonationItem.Notes" placeholder="Write item details, model, working condition, pickup note and other useful information..." required data-label="Item Detail"></textarea>
+                        </div>
+                        <div class="field full" style="text-align:center; padding-top:18px; padding-bottom:14px;">
+                            <button class="btn ok" type="submit" style="min-width:260px; margin:0 auto; display:inline-flex; justify-content:center; align-items:center; font-weight:800; padding:14px 30px;">Submit Donation</button>
+                        </div>
+                    </div>
+                }
+
+            }
+        </div>
+
+        <div class="card" style="margin-top:28px;">
+            <div class="head">
+                <h3 style="font-weight:800;">Donor Requests List</h3>
+                <p>Submitted donation lastet records are shown below.</p>
+            </div>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Donor ID</th>
+                            <th>Donor Name</th>
+                            <th>Item Name</th>
+                            <th>Image</th>
+                            <th>Status</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (donorVm.LatestItems == null || !donorVm.LatestItems.Any())
+                        {
+                            <tr><td colspan="6">No donation item submitted yet.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var item in donorVm.LatestItems)
+                            {
+                                var statusClass = item.Status == ApprovalStatus.Approved ? "ok" : (donorProfile.Status == ApprovalStatus.Rejected ? "bad" : "warn");
+                                <tr>
+                                    <td>DNR-@donorProfile.Id.ToString("000000")</td>
+                                    <td>@donorName</td>
+                                    <td>@item.ItemName</td>
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(item.ImagePath))
+                                        {
+                                            <img src="@Url.Content(item.ImagePath)" alt="Item Image" style="width:52px;height:52px;object-fit:cover;border-radius:10px;" />
+                                        }
+                                        else
+                                        {
+                                            <span class="badge">No Image</span>
+                                        }
+                                    </td>
+                                    <td><span class="badge @statusClass">@donorProfile.Status</span></td>
+                                    <td><a class="iconbtn" title="Open detail" href="@Url.Action("Detail", "Donor", new { id = donorProfile.Id })">&#128065;</a></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:28px;">
+            <div class="head"><div class="flex"><span class="badge" style="font-weight:800;">Chat</span><span class="small">Active conversation</span></div></div>
+            <div class="chatbox">
+                <div class="messages">
+                    @if (donorVm.Chat == null || donorVm.Chat.Count == 0)
+                    {
+                        <div class="small">No messages yet.</div>
+                    }
+                    else
+                    {
+                        foreach (var m in donorVm.Chat)
+                        {
+                            var isMine = m.SenderRole == "Donor";
+                            <div class="bubble @(isMine ? "me" : "them")">
+                                <div class="meta-line">@m.SenderRole • @m.SentAtUtc.ToLocalTime().ToString("dd MMM yyyy hh:mm tt")</div>
+                                <div>@m.Message</div>
+                                <div class="chat-delete-actions">
+                                    @using (Html.BeginForm("DeleteMessageForMe", "Donor", FormMethod.Post, new { @class = "inline-delete-form" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="donorId" value="@activeId" />
+                                        <input type="hidden" name="messageId" value="@m.Id" />
+                                        <button type="submit" class="chat-delete-btn">Delete for me</button>
+                                    }
+                                    @if (isMine)
+                                    {
+                                        using (Html.BeginForm("DeleteMessageForEveryone", "Donor", FormMethod.Post, new { @class = "inline-delete-form" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="donorId" value="@activeId" />
+                                            <input type="hidden" name="messageId" value="@m.Id" />
+                                            <button type="submit" class="chat-delete-btn delete-everyone">Delete for everyone</button>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+                @using (Html.BeginForm("SendMessage", "Donor", FormMethod.Post, new { data_ajax_form = "true" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="send donor-sendbar">
+                        <input type="hidden" name="donorId" value="@activeId" />
+                        <input class="input donor-send-input" name="message" placeholder="Type message to admin..." />
+                        <button class="btn primary donor-send-btn" type="submit">Send</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            function wireAjaxForms() {
+                var forms = document.querySelectorAll('form[data-ajax-form="true"]');
+                forms.forEach(function (form) {
+                    if (form.dataset.ajaxBound === 'true') return;
+                    form.dataset.ajaxBound = 'true';
+                    form.addEventListener('submit', function (ev) {
+                        ev.preventDefault();
+                        var submitter = document.activeElement && document.activeElement.form === form ? document.activeElement : null;
+                        var formData = new FormData(form);
+                        if (submitter && submitter.name) { formData.append(submitter.name, submitter.value || ''); }
+                        fetch(form.action, {
+                            method: form.method || 'POST',
+                            body: formData,
+                            credentials: 'same-origin',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                            .then(function (res) { return res.text(); })
+                            .then(function (html) {
+                                document.open();
+                                document.write(html);
+                                document.close();
+                            })
+                            .catch(function () { form.submit(); });
+                    });
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', wireAjaxForms);
+            } else { wireAjaxForms(); }
+
+            function clearFieldError(input) {
+                if (!input) return;
+                input.classList.remove('input-error');
+                var holder = input.parentElement;
+                if (!holder) return;
+                var err = holder.querySelector('.field-error');
+                if (err) { err.remove(); }
+            }
+
+            function showFieldError(input, message) {
+                if (!input) return;
+                clearFieldError(input);
+                input.classList.add('input-error');
+                var holder = input.parentElement;
+                if (!holder) return;
+                var err = document.createElement('div');
+                err.className = 'field-error';
+                err.textContent = message;
+                holder.appendChild(err);
+            }
+
+            var donorForm = document.querySelector('form.client-validate-form');
+            if (donorForm) {
+                donorForm.addEventListener('submit', function (ev) {
+                    var valid = true;
+                    donorForm.querySelectorAll('[required]').forEach(function (field) {
+                        clearFieldError(field);
+                        var value = (field.value || '').trim();
+                        if (!value) {
+                            valid = false;
+                            showFieldError(field, (field.getAttribute('data-label') || 'This field') + ' is required.');
+                        }
+                    });
+
+                    if (!valid) {
+                        ev.preventDefault();
+                    }
+                });
+
+                donorForm.querySelectorAll('[required]').forEach(function (field) {
+                    field.addEventListener('input', function () {
+                        if ((field.value || '').trim()) {
+                            clearFieldError(field);
+                        }
+                    });
+                    field.addEventListener('change', function () {
+                        if ((field.value || '').trim()) {
+                            clearFieldError(field);
+                        }
+                    });
+                });
+            }
+        })();
+    </script>
+
+
+    <style>
+        .donor-custom-layout .card .head h3 {
+            font-weight: 800;
+        }
+
+        .donor-custom-layout .field label {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .donor-custom-layout .donor-form-grid {
+            padding-left: 34px !important;
+            padding-right: 34px !important;
+        }
+
+        .donor-custom-layout .table-wrap {
+            padding: 0 14px 14px;
+        }
+
+        .donor-custom-layout .chatbox {
+            padding: 0 14px 14px;
+        }
+
+        .donor-custom-layout .messages {
+            min-height: 180px;
+        }
+
+        .donor-custom-layout .card {
+            overflow: hidden;
+        }
+
+        .donor-custom-layout .donor-sendbar {
+            display: grid;
+            grid-template-columns: minmax(0,1fr) auto;
+            align-items: end;
+            gap: 14px;
+            padding: 14px 16px;
+        }
+
+        .donor-custom-layout .donor-send-input {
+            width: 100%;
+            min-width: 0;
+            min-height: 48px;
+            margin: 0;
+        }
+
+        .donor-custom-layout .donor-send-btn {
+            min-width: 88px;
+            padding: 10px 18px;
+            border-radius: 14px;
+            align-self: end;
+            justify-self: start;
+            white-space: nowrap;
+        }
+
+        .donor-custom-layout .chat-delete-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .donor-custom-layout .inline-delete-form {
+            display: inline-block;
+            margin: 0;
+        }
+
+        .donor-custom-layout .chat-delete-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+            opacity: .85;
+        }
+
+        .donor-custom-layout .delete-everyone {
+            font-weight: 700;
+        }
+
+        .donor-custom-layout .input-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239,68,68,.15) !important;
+        }
+
+        .donor-custom-layout .field-error {
+            margin-top: 6px;
+            color: #dc2626;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        @@media (max-width: 760px) {
+            .donor-custom-layout .form-grid.two-col {
+                padding: 10px 16px 22px !important;
+            }
+
+            .donor-custom-layout .donor-sendbar {
+                grid-template-columns: minmax(0,1fr) auto;
+                gap: 10px;
+            }
+        }
+    </style>
+
+    <div class="footer">Powered by MVC 5 donor module</div>
+</div>
+
+
+@*map configration*@
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    let map, marker;
+
+    // Initialize map with fallback (Karachi)
+    function initMap(lat = 24.8607, lng = 67.0011, zoom = 13) {
+        map = L.map('map').setView([lat, lng], zoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Add marker if exists
+        if (!marker) {
+            marker = L.marker([lat, lng]).addTo(map);
+        } else {
+            marker.setLatLng([lat, lng]);
+        }
+
+        // Click on map to pick address
+        map.on('click', function (e) {
+            const clickLat = e.latlng.lat;
+            const clickLng = e.latlng.lng;
+
+            marker.setLatLng([clickLat, clickLng]);
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${clickLat}&lon=${clickLng}&format=json`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('deliveryAddress').value = data.display_name;
+                });
+        });
+    }
+
+    // Function to go to current location (button)
+    function goToCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    map.setView([lat, lng], 15);
+
+                    if (!marker) {
+                        marker = L.marker([lat, lng]).addTo(map);
+                    } else {
+                        marker.setLatLng([lat, lng]);
+                    }
+
+                    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById('deliveryAddress').value = data.display_name;
+                        });
+                },
+                function (error) {
+                    alert("Could not get your location: " + error.message);
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    // On page load: try to initialize map at current location
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                initMap(position.coords.latitude, position.coords.longitude, 15);
+            },
+            function () {
+                initMap(); // fallback to default
+            }
+        );
+    } else {
+        initMap(); // fallback
+    }
+</script>

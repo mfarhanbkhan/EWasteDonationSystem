@@ -1,0 +1,117 @@
+<!-- @model EWasteDonationSystem.Models.Donor -->
+<!-- @{ -->
+<!--     ViewBag.Title = "Donor Detail"; -->
+<!-- } -->
+
+<!-- <div class="container"> -->
+<!--     <div class="topbar"> -->
+<!--         <div class="brand"> -->
+<!--             <div class="logo"><img src="@Url.Content("~/Content/images/DonorDetailLogo.jpeg")" alt="Logo" /></div> -->
+<!--             <div> -->
+<!--                 <h1>Donor Detail</h1> -->
+<!--                 <p>Profile + items + chat (Admin view).</p> -->
+<!--             </div> -->
+<!--         </div> -->
+<!--         <div class="nav"> -->
+<!--             <a class="chip" href="@Url.Action("Dashboard", "Admin")">Back to Admin</a> -->
+<!--             <a class="chip" href="@Url.Action("Dashboard", "Donor", new { id = Model.Id })">Open Donor Dashboard</a> -->
+<!--         </div> -->
+<!--     </div> -->
+
+<!--     <div class="grid" style="margin-top:18px;"> -->
+<!--         <div class="card"> -->
+<!--             <div class="head"> -->
+<!--                 <h3>Profile</h3> -->
+<!--                 <p>Donor information (location portion removed).</p> -->
+<!--             </div> -->
+<!--             <div class="body"> -->
+<!--                 <div class="form"> -->
+<!--                     <div class="field"><label>Full Name</label><div class="input" style="padding:12px">@Model.FullName</div></div> -->
+<!--                     <div class="field"><label>Phone</label><div class="input" style="padding:12px">@Model.Phone</div></div> -->
+<!--                     <div class="field"><label>Email</label><div class="input" style="padding:12px">@Model.Email</div></div> -->
+<!--                     <div class="field"><label>City</label><div class="input" style="padding:12px">@Model.City</div></div> -->
+<!--                     <div class="field full"><label>Address</label><div class="input" style="padding:12px">@Model.Address</div></div> -->
+<!--                     <div class="field"><label>Status</label><span class="badge">@Model.Status</span></div> -->
+<!--                 </div> -->
+<!--             </div> -->
+<!--         </div> -->
+
+<!--         <div class="card"> -->
+<!--             <div class="head"> -->
+<!--                 <h3>Donation Items</h3> -->
+<!--                 <p>Latest items posted by donor.</p> -->
+<!--             </div> -->
+<!--             <div class="body"> -->
+<!--                 <table class="table"> -->
+<!--                     <thead> -->
+<!--                         <tr> -->
+<!--                             <th>Item</th> -->
+<!--                             <th>Qty</th> -->
+<!--                             <th>Category</th> -->
+<!--                             <th>Condition</th> -->
+<!--                             <th>Image</th> -->
+<!--                         </tr> -->
+<!--                     </thead> -->
+<!--                     <tbody> -->
+<!--                         @foreach (var it in Model.DonationItems.OrderByDescending(x => x.Id)) -->
+<!--                         { -->
+<!--                             <tr> -->
+<!--                                 <td>@it.ItemName</td> -->
+<!--                                 <td>@it.Quantity</td> -->
+<!--                                 <td>@it.Category</td> -->
+<!--                                 <td>@it.Condition</td> -->
+<!--                                 <td> -->
+<!--                                     @if (!string.IsNullOrWhiteSpace(it.ImagePath)) -->
+<!--                                     { -->
+<!--                                         <img src="@it.ImagePath" alt="Item" style="width:60px;height:60px;object-fit:cover;border-radius:10px;" /> -->
+<!--                                     } -->
+<!--                                     else -->
+<!--                                     { -->
+<!--                                         <span class="small">—</span> -->
+<!--                                     } -->
+<!--                                 </td> -->
+<!--                             </tr> -->
+<!--                         } -->
+<!--                     </tbody> -->
+<!--                 </table> -->
+<!--             </div> -->
+<!--         </div> -->
+<!--     </div> -->
+
+<!--     <div class="chat" style="margin-top:18px;"> -->
+<!--         <div class="head"> -->
+<!--             <div class="flex"> -->
+<!--                 <span class="badge" style="border-color: rgba(110,231,255,.35)">Chat</span> -->
+<!--                 <span class="small">Admin ↔ Donor</span> -->
+<!--             </div> -->
+<!--         </div> -->
+<!--         <div class="msgs"> -->
+<!--             @if (Model.ChatMessages.Count == 0) -->
+<!--             { -->
+<!--                 <div class="small">No messages yet.</div> -->
+<!--             } -->
+<!--             else -->
+<!--             { -->
+<!--                 foreach (var m in Model.ChatMessages.OrderBy(x => x.SentAtUtc)) -->
+<!--                 { -->
+<!--                     <div class="msg @(m.SenderRole == "Admin" ? "me" : "")"> -->
+<!--                         <div class="meta">@m.SenderRole • @m.SentAtUtc.ToLocalTime().ToString("g")</div> -->
+<!--                         <div class="text">@m.Message</div> -->
+<!--                     </div> -->
+<!--                 } -->
+<!--             } -->
+<!--         </div> -->
+
+<!--         @using (Html.BeginForm("SendMessageToDonor", "Admin", FormMethod.Post)) -->
+<!--         { -->
+<!--             @Html.AntiForgeryToken() -->
+<!--             <div class="send"> -->
+<!--                 <input type="hidden" name="donorId" value="@Model.Id" /> -->
+<!--                 <input class="input" name="message" placeholder="Type message to donor..." /> -->
+<!--                 <button class="btn primary" type="submit">Send</button> -->
+<!--             </div> -->
+<!--         } -->
+<!--     </div> -->
+
+<!--     <div class="footer">Donor Detail — Admin View</div> -->
+<!-- </div> -->

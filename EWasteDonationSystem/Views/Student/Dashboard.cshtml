@@ -1,0 +1,329 @@
+@* Documented for easier understanding. *@
+@model EWasteDonationSystem.Models.StudentDashboardVm
+@using EWasteDonationSystem.Models
+@using System.Linq
+@{
+    ViewBag.Title = "Students / Needy Person";
+    var studentVm = Model ?? new StudentDashboardVm();
+    var studentProfile = studentVm.Student ?? new Student();
+    var activeId = studentProfile.Id;
+    var isLoggedIn = Session["StudentId"] != null;
+    var studentName = Session["StudentName"] as string;
+    var studentEmail = !string.IsNullOrWhiteSpace(studentProfile.Email) ? studentProfile.Email : (Session["StudentEmail"] as string ?? "");
+    var isAdminView = Session["AdminLoggedIn"] is bool && (bool)Session["AdminLoggedIn"];
+}
+
+<div class="container dashboard-page">
+    <div class="topbar slim-topbar">
+        <div class="brand">
+            <div class="logo"><img src="@Url.Content("~/Content/images/StudentLogo.jpeg")" alt="Logo" /></div>
+            <div>
+                <h1>Students / Needy Person</h1>
+                <p>Apply for donation items, track application, and chat with admin.</p>
+            </div>
+        </div>
+        <div class="nav">
+            @if (isAdminView)
+            {
+                <span style="color: #666; margin-right: 16px;">Email: <strong>@studentEmail</strong></span>
+                <a class="chip" href="@Url.Action("Dashboard", "Admin")">Back To Admin</a>
+                <a class="chip" href="@Url.Action("Index", "Home")">Home</a>
+            }
+            else
+            {
+                <span style="color: #666; margin-right: 16px;">Email: <strong>@studentEmail</strong></span>
+                <a class="chip" href="@Url.Action("Index", "Home")">Home</a>
+                <a class="chip" href="@Url.Action("Logout", "Account", new { role = "student" })">Logout</a>
+            }
+        </div>
+    </div>
+
+    <div class="dashboard-banner student-theme banner-image-only">
+        <img src="@Url.Content("~/Content/images/StudentBanner.jpeg")" alt="Student banner" class="full-banner-image" />
+    </div>
+
+    @if (!isLoggedIn)
+    {
+        <div class="flash-strip" style="margin-bottom:16px;">Student sign up and login are available only on the Choose Role page. Admin can open this student page directly from the Admin page.</div>
+    }
+
+    @if (!isAdminView)
+    {
+    <div class="card form-card section-gap student-form-card">
+        <div class="head"><h3>Student/Needy Person Form</h3><p>Fill all information in one form and then check detail.</p></div>
+        <div class="body student-form-body">
+            @using (Html.BeginForm("SaveStudentPersonForm", "Student", FormMethod.Post, new { data_ajax_form = "true", @class = "client-validate-form" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Student.Id" value="@studentProfile.Id" />
+                <input type="hidden" name="Application.StudentId" value="@studentProfile.Id" />
+                <div class="form compact-form student-form-grid">
+                    <div class="field full"><label>Student/Needy Name</label><input class="input" type="text" name="Student.FullName" value="" placeholder="Student/Needy Name" required data-label="Student/Needy Name" /></div>
+                    <div class="field"><label>Phone Number</label><input class="input" type="text" name="Student.Phone" value="" placeholder="+92 301 7700123" required data-label="Phone Number" /></div>
+                    <div class="field"><label>Institute</label><input class="input" type="text" name="Student.Institute" value="" placeholder="Govt College" required data-label="Institute" /></div>
+                    <div class="field"><label>City</label><input class="input" type="text" name="Student.City" value="" placeholder="Dera Ismail Khan" required data-label="City" /></div>
+                    <div class="field"><label>Address</label><input class="input" type="text" name="Student.Address" value="" placeholder="Street / Area / City" required data-label="Address" /></div>
+                    <div class="field full"><label>Item Needed</label><textarea class="input" name="Application.ItemsNeeded" placeholder="Laptop for study (any working condition)." required data-label="Item Needed"></textarea></div>
+                    <div class="field full"><label>Reason / Detail</label><textarea class="input" name="Application.Reason" placeholder="Final year project + online classes." required data-label="Reason / Detail"></textarea></div>
+                </div>
+                <div class="hr"></div>
+                <div class="student-form-actions" style="padding-top:8px; padding-bottom:10px;">
+                    <button class="btn ok" type="submit">Submit Student/Needy Person Detail</button>
+                </div>
+            }
+        </div>
+    </div>
+    }
+    <div class="dashboard-two-col section-gap bottom-align">
+        <div class="card list-card">
+            <div class="head"><h3>Application List</h3><p>See your latest added application detail.</p></div>
+            <div class="body table-scroll">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>Institute Name</th>
+                            <th>Needed</th>
+                            <th>Status</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (studentVm.LatestApplications == null || studentVm.LatestApplications.Count == 0)
+                        {
+                            <tr><td colspan="6">No applications found.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var app in studentVm.LatestApplications.Take(8))
+                            {
+                                var studentStatus = studentProfile.Status;
+                                var statusClass = studentStatus == ApprovalStatus.Approved ? "ok" : (studentStatus == ApprovalStatus.Rejected ? "bad" : "warn");
+                                <tr>
+                                    <td>STD-@studentProfile.Id.ToString("000000")</td>
+                                    <td>@studentProfile.FullName</td>
+                                    <td>@(string.IsNullOrWhiteSpace(studentProfile.Institute) ? "-" : studentProfile.Institute)</td>
+                                    <td>@app.ItemsNeeded</td>
+                                    <td><span class="badge @statusClass">@studentStatus</span></td>
+                                    <td><a class="iconbtn" title="Open detail" href="@Url.Action("Detail", "Student", new { id = activeId })">&#128065;</a></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="chat conversation-card">
+            <div class="head"><div class="flex"><span class="badge">Chat</span><span class="small">Active conversation</span></div></div>
+            <div class="msgs tall-msgs">
+                @if (studentVm.Chat == null || studentVm.Chat.Count == 0)
+                {
+                    <div class="empty">No chat messages yet.</div>
+                }
+                else
+                {
+                    foreach (var msg in studentVm.Chat)
+                    {
+                        var mine = string.Equals(msg.SenderRole, "Student", System.StringComparison.OrdinalIgnoreCase);
+                        <div class="bubble @(mine ? "me" : "other")">
+                            <div class="meta">@msg.SenderRole <span>@msg.SentAtUtc.ToLocalTime().ToString("dd MMM yyyy hh:mm tt")</span></div>
+                            <p>@msg.Message</p>
+                            <div class="chat-delete-actions">
+                                @using (Html.BeginForm("DeleteMessageForMe", "Student", FormMethod.Post, new { @class = "inline-delete-form" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="studentId" value="@activeId" />
+                                    <input type="hidden" name="messageId" value="@msg.Id" />
+                                    <button type="submit" class="chat-delete-btn">Delete for me</button>
+                                }
+                                @if (mine)
+                                {
+                                    using (Html.BeginForm("DeleteMessageForEveryone", "Student", FormMethod.Post, new { @class = "inline-delete-form" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="studentId" value="@activeId" />
+                                        <input type="hidden" name="messageId" value="@msg.Id" />
+                                        <button type="submit" class="chat-delete-btn delete-everyone">Delete for everyone</button>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            @using (Html.BeginForm("SendMessage", "Student", FormMethod.Post, new { data_ajax_form = "true" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="studentId" value="@activeId" />
+                <div class="send student-sendbar">
+                    <input class="input student-send-input" type="text" name="message" placeholder="Type message to admin..." />
+                    <button class="btn primary student-send-btn" type="submit">Send</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            function wireAjaxForms() {
+                var forms = document.querySelectorAll('form[data-ajax-form="true"]');
+                forms.forEach(function (form) {
+                    if (form.dataset.ajaxBound === 'true') return;
+                    form.dataset.ajaxBound = 'true';
+                    form.addEventListener('submit', function (ev) {
+                        ev.preventDefault();
+                        var submitter = document.activeElement && document.activeElement.form === form ? document.activeElement : null;
+                        var formData = new FormData(form);
+                        if (submitter && submitter.name) { formData.append(submitter.name, submitter.value || ''); }
+                        fetch(form.action, {
+                            method: form.method || 'POST',
+                            body: formData,
+                            credentials: 'same-origin',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                            .then(function (res) { return res.text(); })
+                            .then(function (html) {
+                                document.open();
+                                document.write(html);
+                                document.close();
+                            })
+                            .catch(function () { form.submit(); });
+                    });
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', wireAjaxForms);
+            } else { wireAjaxForms(); }
+
+            function clearFieldError(input) {
+                if (!input) return;
+                input.classList.remove('input-error');
+                var holder = input.parentElement;
+                if (!holder) return;
+                var err = holder.querySelector('.field-error');
+                if (err) { err.remove(); }
+            }
+
+            function showFieldError(input, message) {
+                if (!input) return;
+                clearFieldError(input);
+                input.classList.add('input-error');
+                var holder = input.parentElement;
+                if (!holder) return;
+                var err = document.createElement('div');
+                err.className = 'field-error';
+                err.textContent = message;
+                holder.appendChild(err);
+            }
+
+            var studentForm = document.querySelector('form.client-validate-form');
+            if (studentForm) {
+                studentForm.addEventListener('submit', function (ev) {
+                    var valid = true;
+                    studentForm.querySelectorAll('[required]').forEach(function (field) {
+                        clearFieldError(field);
+                        var value = (field.value || '').trim();
+                        if (!value) {
+                            valid = false;
+                            showFieldError(field, (field.getAttribute('data-label') || 'This field') + ' is required.');
+                        }
+                    });
+
+                    if (!valid) {
+                        ev.preventDefault();
+                    }
+                });
+
+                studentForm.querySelectorAll('[required]').forEach(function (field) {
+                    field.addEventListener('input', function () {
+                        if ((field.value || '').trim()) {
+                            clearFieldError(field);
+                        }
+                    });
+                    field.addEventListener('change', function () {
+                        if ((field.value || '').trim()) {
+                            clearFieldError(field);
+                        }
+                    });
+                });
+            }
+        })();
+    </script>
+
+    <style>
+        .student-form-card .student-form-body {
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+
+        .student-form-card textarea.input {
+            min-height: 110px;
+        }
+
+        .conversation-card .student-sendbar {
+            align-items: center;
+            padding: 14px 16px;
+        }
+
+        .conversation-card .student-send-input {
+            flex: 1;
+            min-height: 48px;
+        }
+
+        .conversation-card .student-send-btn {
+            min-width: 76px;
+            padding: 10px 18px;
+            border-radius: 14px;
+            flex: 0 0 auto;
+        }
+
+        .conversation-card .chat-delete-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .conversation-card .inline-delete-form {
+            display: inline-block;
+            margin: 0;
+        }
+
+        .conversation-card .chat-delete-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+            opacity: .85;
+        }
+
+        .conversation-card .delete-everyone {
+            font-weight: 700;
+        }
+
+        .student-form-card .input-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239,68,68,.15) !important;
+        }
+
+        .student-form-card .field-error {
+            margin-top: 6px;
+            color: #dc2626;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        @@media (max-width: 768px) {
+            .student-form-card .student-form-body {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+        }
+    </style>
+
+    <div class="footer">Powered by MVC 5 student module</div>
+</div>

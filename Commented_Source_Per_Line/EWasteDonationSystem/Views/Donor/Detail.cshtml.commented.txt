@@ -1,0 +1,134 @@
+@* @* Documented for easier understanding. * @ *@
+@* @model EWasteDonationSystem.Models.Donor *@
+@* @using System.Linq *@
+@* @using EWasteDonationSystem.Models *@
+@* @{ *@
+@*     ViewBag.Title = "Donor Detail"; *@
+@*     var items = Model.DonationItems == null ? new List<DonationItem>() : Model.DonationItems.OrderByDescending(x => x.Id).ToList(); *@
+@*     var statusClass = Model.Status == ApprovalStatus.Approved ? "ok" : (Model.Status == ApprovalStatus.Rejected ? "bad" : "warn"); *@
+@* } *@
+
+@* <div class="container detail-screen"> *@
+@*     <div class="topbar detail-topbar"> *@
+@*         <div class="brand"> *@
+@*             <div class="logo"><img src="@Url.Content("~/Content/images/DonorDetailLogo.jpeg")" alt="Logo" /></div> *@
+@*             <div> *@
+@*                 <h1>Donor Detail</h1> *@
+@*                 <p>Shows donor profile, donation items and admin chat system.</p> *@
+@*             </div> *@
+@*         </div> *@
+@*         <div class="nav"> *@
+@*             <a class="chip detail-back" href="@Url.Action("Dashboard", "Donor", new { id = Model.Id })">Back to Donor</a> *@
+@*         </div> *@
+@*     </div> *@
+
+@*     <div class="detail-grid" style="gap:24px;"> *@
+@*         <section class="detail-card profile-card"> *@
+@*             <div class="detail-card-head"> *@
+@*                 <h3 style="font-weight:800;">Profile</h3> *@
+@*                 <div class="detail-meta-row"> *@
+@*                     <span>Donor ID: DNR-@Model.Id.ToString("000000")</span> *@
+@*                     <span>Created: @Model.CreatedAtUtc.ToLocalTime().ToString("M/d/yyyy, h:mm:ss tt")</span> *@
+@*                     <span class="badge @statusClass">@Model.Status</span> *@
+@*                 </div> *@
+@*             </div> *@
+@*             <div class="detail-card-body detail-profile-grid"> *@
+@*                 <div class="profile-field"><label>Donor Name</label><strong>@Model.FullName</strong></div> *@
+@*                 <div class="profile-field"><label>Phone</label><strong>@(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)</strong></div> *@
+@*                 <div class="profile-field"><label>Email</label><strong>@(string.IsNullOrWhiteSpace(Model.Email) ? "—" : Model.Email)</strong></div> *@
+@*                 <div class="profile-field"><label>City</label><strong>@(string.IsNullOrWhiteSpace(Model.City) ? "—" : Model.City)</strong></div> *@
+@*                 <div class="profile-field full"><label>Address</label><strong>@(string.IsNullOrWhiteSpace(Model.Address) ? "—" : Model.Address)</strong></div> *@
+@*             </div> *@
+@*         </section> *@
+
+@*         <section class="detail-card request-card"> *@
+@*             <div class="detail-card-head"> *@
+@*                 <h3 style="font-weight:800;">Donation Items</h3> *@
+@*                 <p>All submitted donation items are shown below.</p> *@
+@*             </div> *@
+@*             <div class="detail-card-body"> *@
+@*                 <table class="table detail-table-lite"> *@
+@*                     <thead> *@
+@*                         <tr> *@
+@*                             <th>Image</th> *@
+@*                             <th>Item Name</th> *@
+@*                             <th>Qty</th> *@
+@*                             <th>Category</th> *@
+@*                             <th>Condition</th> *@
+@*                             <th>Item Detail</th> *@
+@*                         </tr> *@
+@*                     </thead> *@
+@*                     <tbody> *@
+@*                         @if (!items.Any()) *@
+@*                         { *@
+@*                             <tr><td colspan="6">No donation item submitted yet.</td></tr> *@
+@*                         } *@
+@*                         else *@
+@*                         { *@
+@*                             foreach (var item in items) *@
+@*                             { *@
+@*                                 <tr> *@
+@*                                     <td> *@
+@*                                         @if (!string.IsNullOrWhiteSpace(item.ImagePath)) *@
+@*                                         { *@
+@*                                             <img class="detail-thumb" src="@Url.Content(item.ImagePath)" alt="Item" /> *@
+@*                                         } *@
+@*                                         else *@
+@*                                         { *@
+@*                                             <img class="detail-thumb" src="@Url.Content("~/Content/assets/item-placeholder.svg")" alt="Item" /> *@
+@*                                         } *@
+@*                                     </td> *@
+@*                                     <td>@item.ItemName</td> *@
+@*                                     <td>@item.Quantity</td> *@
+@*                                     <td>@(string.IsNullOrWhiteSpace(item.Category) ? "—" : item.Category)</td> *@
+@*                                     <td>@(string.IsNullOrWhiteSpace(item.Condition) ? "—" : item.Condition)</td> *@
+@*                                     <td>@(string.IsNullOrWhiteSpace(item.Notes) ? "—" : item.Notes)</td> *@
+@*                                 </tr> *@
+@*                             } *@
+@*                         } *@
+@*                     </tbody> *@
+@*                 </table> *@
+@*             </div> *@
+@*         </section> *@
+@*     </div> *@
+
+@*     <section class="detail-card chat-detail-card" style="margin-top:24px;"> *@
+@*         <div class="chat-detail-head"> *@
+@*             <div class="chat-detail-tabs"> *@
+@*                 <span class="chip active" style="font-weight:800;">Chat</span> *@
+@*                 <span class="small">Donation status and chat system</span> *@
+@*             </div> *@
+@*             <a class="chip" href="@Url.Action("Dashboard", "Donor", new { id = Model.Id })">Donor Dashboard</a> *@
+@*         </div> *@
+
+@*         <div class="detail-chat-window"> *@
+@*             @if (Model.ChatMessages == null || Model.ChatMessages.Count == 0) *@
+@*             { *@
+@*                 <div class="chat-empty-note">No chat messages yet.</div> *@
+@*             } *@
+@*             else *@
+@*             { *@
+@*                 foreach (var m in Model.ChatMessages.OrderBy(x => x.SentAtUtc)) *@
+@*                 { *@
+@*                     var mine = string.Equals(m.SenderRole, "Donor", System.StringComparison.OrdinalIgnoreCase); *@
+@*                     <div class="detail-bubble @(mine ? "mine" : "theirs")"> *@
+@*                         <div>@m.Message</div> *@
+@*                         <small>@m.SentAtUtc.ToLocalTime().ToString("M/d/yyyy, h:mm:ss tt")</small> *@
+@*                     </div> *@
+@*                 } *@
+@*             } *@
+@*         </div> *@
+
+@*         @using (Html.BeginForm("SendMessage", "Donor", FormMethod.Post)) *@
+@*         { *@
+@*             @Html.AntiForgeryToken() *@
+@*             <div class="detail-chat-send"> *@
+@*                 <input type="hidden" name="donorId" value="@Model.Id" /> *@
+@*                 <input class="input" name="message" placeholder="Type message to admin..." /> *@
+@*                 <button class="btn primary" type="submit">Send</button> *@
+@*             </div> *@
+@*         } *@
+@*     </section> *@
+
+@*     <div class="footer">Donor Detail</div> *@
+@* </div> *@

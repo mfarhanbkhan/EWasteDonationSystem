@@ -1,0 +1,261 @@
+@* @* Documented for easier understanding. * @ *@
+@* @{ *@
+@*     // Home page title shown in the browser tab. *@
+@*     ViewBag.Title = "E-Waste Pickup and Donations System"; *@
+@* } *@
+
+
+
+@* @* Main home page wrapper. The page design is now loaded from Content/assets/style.css for cleaner structure. * @ *@
+@* <div class="landing-wrap"> *@
+@*     <div class="landing-nav"> *@
+@*         <div class="landing-brand"> *@
+@*             <div class="brand-mark"> *@
+@*                 <img src="@Url.Content("~/Content/images/HomePageLogo.jpeg")" alt="Ecolynk logo" /> *@
+@*             </div> *@
+@*             <div> *@
+@*                 <h1>Ecolynk</h1> *@
+@*                 <p>E-Waste Donation, Pickup and Support Platform</p> *@
+@*             </div> *@
+@*         </div> *@
+
+@*         <a class="landing-btn primary" href="@Url.Action("ChooseRole", "Home")">Enter the System</a> *@
+@*     </div> *@
+
+@*         @* Hero section with introduction and visual highlight. * @ *@
+@*     <section class="landing-hero"> *@
+@*         <div class="hero-copy"> *@
+@*             <span class="hero-chip">Smart • Clean • Community Focused</span> *@
+@*             <h2>Turn unused electronics into real support for people who need them.</h2> *@
+@*             <p class="lead"> *@
+@*                 A beautiful first impression for your project with a modern landing page that explains the system clearly, *@
+@*                 encourages users to continue, and highlights responsible e-waste donation and pickup in one place. *@
+@*             </p> *@
+
+@*             <ul class="hero-points"> *@
+@*                 <li> *@
+@*                     <div class="point-icon"><img src="@Url.Content("~/Content/images/Easy for donors.jfif")" alt="Donor support" /></div> *@
+@*                     <div> *@
+@*                         <b>Easy for donors</b> *@
+@*                         <span>Submit donation details, share item information, and stay connected with admin.</span> *@
+@*                     </div> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <div class="point-icon"><img src="@Url.Content("~/Content/images/Helpful for students and needy persons.jfif")" alt="Student support" /></div> *@
+@*                     <div> *@
+@*                         <b>Helpful for students and needy persons</b> *@
+@*                         <span>Request useful devices through a simple system designed for support and transparency.</span> *@
+@*                     </div> *@
+@*                 </li> *@
+@*                 <li> *@
+@*                     <div class="point-icon"><img src="@Url.Content("~/Content/images/Powerful for admin control.jfif")" alt="Admin control" /></div> *@
+@*                     <div> *@
+@*                         <b>Powerful for admin control</b> *@
+@*                         <span>Manage approvals, pickup assignment, requests, and communication from one dashboard.</span> *@
+@*                     </div> *@
+@*                 </li> *@
+@*             </ul> *@
+
+@*             <div class="hero-actions"> *@
+@*                 <a class="landing-btn primary" href="@Url.Action("ChooseRole", "Home")">Get Started</a> *@
+@*                 <a class="landing-btn secondary" href="#roles">Explore Roles</a> *@
+@*             </div> *@
+
+@*             <div class="hero-stats"> *@
+@*                 <div class="stat"> *@
+@*                     <strong>@ViewBag.DonorCount</strong> *@
+@*                     <span>Registered Donors</span> *@
+@*                 </div> *@
+@*                 <div class="stat"> *@
+@*                     <strong>@ViewBag.StudentCount</strong> *@
+@*                     <span>Student Requests</span> *@
+@*                 </div> *@
+@*                 <div class="stat"> *@
+@*                     <strong>@ViewBag.ItemCount</strong> *@
+@*                     <span>Donation Items</span> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+
+@*         <div class="hero-visual"> *@
+@*             <img src="@Url.Content("~/Content/images/Home-Hero.jpeg")" alt="E-waste donation hero" /> *@
+@*             <div class="visual-card"> *@
+@*                 <h3>Clean design. Better first impression.</h3> *@
+@*                 <p> *@
+@*                     This home page is designed to look more professional, modern, and user friendly while keeping the rest *@
+@*                     of your project unchanged. *@
+@*                 </p> *@
+@*             </div> *@
+@*         </div> *@
+@*     </section> *@
+
+@*     <section class="landing-section" id="roles"> *@
+@*         <div class="section-head"> *@
+@*             <div> *@
+@*                 <h3>Designed for every user role</h3> *@
+@*                 <p>Each part of the system supports a clear journey so users understand where to go and what to do next.</p> *@
+@*             </div> *@
+@*         </div> *@
+
+@*         <div class="role-grid"> *@
+@*             <article class="role-card"> *@
+@*                 <img src="@Url.Content("~/Content/images/DonorBanner.jpeg")" alt="Donor role" /> *@
+@*                 <div class="content"> *@
+@*                     <span class="role-tag">Donor Portal</span> *@
+@*                     <h4>Donate devices with confidence</h4> *@
+@*                     <p>Donors can share electronic items that may still be useful instead of letting them become waste.</p> *@
+@*                     <ul> *@
+@*                         <li>Submit donation details</li> *@
+@*                         <li>Track your contribution process</li> *@
+@*                         <li>Connect with admin through chat</li> *@
+@*                     </ul> *@
+@*                     <a class="landing-btn secondary" href="@Url.Action("ChooseRole", "Home", new { role = "donor" })">Open Donor Access</a> *@
+@*                 </div> *@
+@*             </article> *@
+
+@*             <article class="role-card"> *@
+@*                 <img src="@Url.Content("~/Content/images/StudentBanner.jpeg")" alt="Student role" /> *@
+@*                 <div class="content"> *@
+@*                     <span class="role-tag" style="background:rgba(167,139,250,.12);color:#6d28d9;">Student / Needy</span> *@
+@*                     <h4>Request support in a simple way</h4> *@
+@*                     <p>Students and needy persons can apply for the devices they need through an organized digital process.</p> *@
+@*                     <ul> *@
+@*                         <li>Fill in your application</li> *@
+@*                         <li>Share your required details</li> *@
+@*                         <li>Get reviewed by the admin side</li> *@
+@*                     </ul> *@
+@*                     <a class="landing-btn secondary" href="@Url.Action("ChooseRole", "Home", new { role = "student" })">Open Student Access</a> *@
+@*                 </div> *@
+@*             </article> *@
+
+@*             <article class="role-card"> *@
+@*                 <img src="@Url.Content("~/Content/images/AdminBanner.jpeg")" alt="Admin role" /> *@
+@*                 <div class="content"> *@
+@*                     <span class="role-tag" style="background:rgba(45,212,191,.14);color:#0f766e;">Admin Control</span> *@
+@*                     <h4>Manage the whole workflow</h4> *@
+@*                     <p>Admin monitors the system, approves users, assigns pickup agents, and keeps the process organized.</p> *@
+@*                     <ul> *@
+@*                         <li>Approve or reject requests</li> *@
+@*                         <li>Assign pickup agents</li> *@
+@*                         <li>Manage communication and records</li> *@
+@*                     </ul> *@
+@*                     <a class="landing-btn secondary" href="@Url.Action("ChooseRole", "Home", new { role = "admin" })">Open Admin Access</a> *@
+@*                 </div> *@
+@*             </article> *@
+@*         </div> *@
+@*     </section> *@
+
+@*     <section class="landing-section"> *@
+@*         <div class="section-head"> *@
+@*             <div> *@
+@*                 <h3>Why this system feels better</h3> *@
+@*                 <p>A clean layout, attractive sections, and clear information make your first page look stronger and more impressive.</p> *@
+@*             </div> *@
+@*         </div> *@
+
+@*         <div class="feature-grid"> *@
+@*             <div class="feature-card"> *@
+@*                 <div class="feature-icon"><img src="@Url.Content("~/Content/images/Responsible e-waste handling.jfif")" alt="Responsible e-waste handling" /></div> *@
+@*                 <h4>Responsible e-waste handling</h4> *@
+@*                 <p>Encourages reuse and better management of electronic items that might otherwise be discarded.</p> *@
+@*             </div> *@
+@*             <div class="feature-card"> *@
+@*                 <div class="feature-icon"><img src="@Url.Content("~/Content/images/Quick understanding.jfif")" alt="Quick understanding" /></div> *@
+@*                 <h4>Quick understanding</h4> *@
+@*                 <p>Users can understand the platform purpose immediately from the first screen without confusion.</p> *@
+@*             </div> *@
+@*             <div class="feature-card"> *@
+@*                 <div class="feature-icon"><img src="@Url.Content("~/Content/images/Human-centered support.jfif")" alt="Human-centered support" /></div> *@
+@*                 <h4>Human-centered support</h4> *@
+@*                 <p>The design highlights community help, student support, and meaningful donation impact.</p> *@
+@*             </div> *@
+@*             <div class="feature-card"> *@
+@*                 <div class="feature-icon"><img src="@Url.Content("~/Content/images/Organized workflow.jfif")" alt="Organized workflow" /></div> *@
+@*                 <h4>Organized workflow</h4> *@
+@*                 <p>Role-based access and admin management keep the project professional and easy to present.</p> *@
+@*             </div> *@
+@*         </div> *@
+@*     </section> *@
+
+@*     <section class="landing-section"> *@
+@*         <div class="section-head"> *@
+@*             <div> *@
+@*                 <h3>How the process works</h3> *@
+@*                 <p>The system follows a simple flow from donation and application to approval, assignment, and support delivery.</p> *@
+@*             </div> *@
+@*         </div> *@
+
+@*         <div class="process-grid"> *@
+@*             <div class="process-card"> *@
+@*                 <div class="process-number">01</div> *@
+@*                 <h4>User enters the platform</h4> *@
+@*                 <p>From the role page, each user selects donor, student, or admin and continues to the correct panel.</p> *@
+@*             </div> *@
+@*             <div class="process-card"> *@
+@*                 <div class="process-number">02</div> *@
+@*                 <h4>Details are submitted</h4> *@
+@*                 <p>Donation information and student requests are added through the system forms and stored properly.</p> *@
+@*             </div> *@
+@*             <div class="process-card"> *@
+@*                 <div class="process-number">03</div> *@
+@*                 <h4>Admin reviews and manages</h4> *@
+@*                 <p>Admin can verify data, approve records, and assign pickup agents where needed.</p> *@
+@*             </div> *@
+@*             <div class="process-card"> *@
+@*                 <div class="process-number">04</div> *@
+@*                 <h4>Useful devices reach impact</h4> *@
+@*                 <p>Electronic items are redirected toward reuse, reducing waste and increasing support for users.</p> *@
+@*             </div> *@
+@*         </div> *@
+@*     </section> *@
+
+@*     <section class="impact-panel"> *@
+@*         <div class="impact-grid"> *@
+@*             <div> *@
+@*                 <div class="section-head" style="margin-bottom:18px;"> *@
+@*                     <div> *@
+@*                         <h3>Impact that your project can show</h3> *@
+@*                         <p>This section makes the home page look richer while still matching your project theme and existing content.</p> *@
+@*                     </div> *@
+@*                 </div> *@
+
+@*                 <div class="impact-boxes"> *@
+@*                     <div class="impact-box"> *@
+@*                         <h4>Cleaner environment</h4> *@
+@*                         <p>Promotes reuse and helps lower unnecessary electronic waste in the community.</p> *@
+@*                     </div> *@
+@*                     <div class="impact-box"> *@
+@*                         <h4>Better accessibility</h4> *@
+@*                         <p>Gives students and needy persons a better chance to receive useful devices.</p> *@
+@*                     </div> *@
+@*                     <div class="impact-box"> *@
+@*                         <h4>Professional presentation</h4> *@
+@*                         <p>Improves the visual quality of your FYP so the first page feels polished and complete.</p> *@
+@*                     </div> *@
+@*                     <div class="impact-box"> *@
+@*                         <h4>Easy navigation</h4> *@
+@*                         <p>Guides users toward the next step with clear actions and role-based entry points.</p> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+
+@*             <div class="impact-image"> *@
+@*                 <img src="@Url.Content("~/Content/images/Donor-Admin-Student.jpeg")" alt="System collaboration" /> *@
+@*             </div> *@
+@*         </div> *@
+@*     </section> *@
+
+@*         @* Final call-to-action section. * @ *@
+@*     <section class="cta-panel"> *@
+@*         <h3>Start with a stronger first impression</h3> *@
+@*         <p> *@
+@*             Your home page now looks cleaner, neater, and more attractive while the other project pages remain unchanged. *@
+@*             Open the system and continue from the role selection page. *@
+@*         </p> *@
+@*         <div class="hero-actions"> *@
+@*             <a class="landing-btn primary" href="@Url.Action("ChooseRole", "Home")">Go to Choose Role</a> *@
+@*         </div> *@
+@*     </section> *@
+
+@*     <div class="landing-footer">© E-Waste Pickup and Donations System</div> *@
+@* </div> *@

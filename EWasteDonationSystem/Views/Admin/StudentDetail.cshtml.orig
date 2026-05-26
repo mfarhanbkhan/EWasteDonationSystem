@@ -1,0 +1,104 @@
+@model EWasteDonationSystem.Models.Student
+@{
+    ViewBag.Title = "Student Detail";
+}
+
+<div class="container">
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo"><img src="@Url.Content("~/Content/images/StudentDetailLogo.jpeg")" alt="Logo" /></div>
+            <div>
+                <h1>Student Detail</h1>
+                <p>Profile + applications + chat (Admin view).</p>
+            </div>
+        </div>
+        <div class="nav">
+            <a class="chip" href="@Url.Action("Dashboard", "Admin")">Back to Admin</a>
+            <a class="chip" href="@Url.Action("Dashboard", "Student", new { id = Model.Id })">Open Student Dashboard</a>
+        </div>
+    </div>
+
+    <div class="grid" style="margin-top:18px;">
+        <div class="card">
+            <div class="head">
+                <h3>Profile</h3>
+                <p>Student information (location portion removed).</p>
+            </div>
+            <div class="body">
+                <div class="form">
+                    <div class="field"><label>Full Name</label><div class="input" style="padding:12px">@Model.FullName</div></div>
+                    <div class="field"><label>Phone</label><div class="input" style="padding:12px">@Model.Phone</div></div>
+                    <div class="field"><label>Institute</label><div class="input" style="padding:12px">@Model.Institute</div></div>
+                    <div class="field"><label>City</label><div class="input" style="padding:12px">@Model.City</div></div>
+                    <div class="field full"><label>Address</label><div class="input" style="padding:12px">@Model.Address</div></div>
+                    <div class="field"><label>Status</label><span class="badge">@Model.Status</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="head">
+                <h3>Applications</h3>
+                <p>Latest applications submitted by student.</p>
+            </div>
+            <div class="body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Items Needed</th>
+                            <th>Reason</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model.Applications.OrderByDescending(x => x.Id))
+                        {
+                            <tr>
+                                <td>@a.ItemsNeeded</td>
+                                <td>@a.Reason</td>
+                                <td>@a.CreatedAtUtc.ToLocalTime().ToString("g")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat" style="margin-top:18px;">
+        <div class="head">
+            <div class="flex">
+                <span class="badge" style="border-color: rgba(110,231,255,.35)">Chat</span>
+                <span class="small">Admin ↔ Student</span>
+            </div>
+        </div>
+        <div class="msgs">
+            @if (Model.ChatMessages.Count == 0)
+            {
+                <div class="small">No messages yet.</div>
+            }
+            else
+            {
+                foreach (var m in Model.ChatMessages.OrderBy(x => x.SentAtUtc))
+                {
+                    <div class="msg @(m.SenderRole == "Admin" ? "me" : "")">
+                        <div class="meta">@m.SenderRole • @m.SentAtUtc.ToLocalTime().ToString("g")</div>
+                        <div class="text">@m.Message</div>
+                    </div>
+                }
+            }
+        </div>
+
+        @using (Html.BeginForm("SendMessageToStudent", "Admin", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <div class="send">
+                <input type="hidden" name="studentId" value="@Model.Id" />
+                <input class="input" name="message" placeholder="Type message to student..." />
+                <button class="btn primary" type="submit">Send</button>
+            </div>
+        }
+    </div>
+
+    <div class="footer">Student Detail — Admin View</div>
+</div>

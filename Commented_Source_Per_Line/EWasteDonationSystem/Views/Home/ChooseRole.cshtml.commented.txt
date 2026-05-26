@@ -1,0 +1,397 @@
+@* @* Documented for easier understanding. * @ *@
+@* @model EWasteDonationSystem.Models.ChooseRoleViewModel *@
+@* @{ *@
+@*     // Choose Role page title shown in the browser tab. *@
+@*     ViewBag.Title = "Choose Role | E-Waste Pickup and Donations system"; *@
+
+@*     // Current role and mode are used to highlight the correct card/tab on page load. *@
+@*     var selectedRole = (Model.SelectedRole ?? "donor").ToLower(); *@
+@*     var mode = (Model.Mode ?? "login").ToLower(); *@
+@* } *@
+
+
+
+@* @* Choose Role page wrapper. Styling is now moved to Content/assets/style.css. * @ *@
+@* <div class="container role-page-wrap"> *@
+@*         @* Main authentication card. * @ *@
+@*     <div class="role-auth-shell"> *@
+@*         <a class="top-home-link" href="@Url.Action("Index", "Home")">← Back to Home</a> *@
+
+@*         <div class="role-auth-header"> *@
+@*             <h1>Choose Your Roles And Get Started</h1> *@
+@*             <p>Select a role, then use login or sign up to continue.</p> *@
+@*         </div> *@
+
+@*                 @* Role selection cards. * @ *@
+@*         <div class="role-card-row"> *@
+@*             <button type="button" class="role-option-card @(selectedRole == "donor" ? "active" : "")" data-role="donor"> *@
+@*                 <div class="role-option-icon" aria-hidden="true"> *@
+@*                     <img src="@Url.Content("~/Content/images/DonorLogo.jpeg")" alt="Donor" /> *@
+@*                 </div> *@
+@*                 <div class="role-option-title">Donor</div> *@
+@*                 <p class="role-option-text">Donate your e-waste responsibly</p> *@
+@*             </button> *@
+
+@*             <button type="button" class="role-option-card @(selectedRole == "admin" ? "active" : "")" data-role="admin"> *@
+@*                 <div class="role-option-icon" aria-hidden="true"> *@
+@*                     <img src="@Url.Content("~/Content/images/AdminLogo.jpeg")" alt="Admin" /> *@
+@*                 </div> *@
+@*                 <div class="role-option-title">NGO / Admin</div> *@
+@*                 <p class="role-option-text">Manage donations and pickups</p> *@
+@*             </button> *@
+
+@*             <button type="button" class="role-option-card @(selectedRole == "student" ? "active" : "")" data-role="student"> *@
+@*                 <div class="role-option-icon" aria-hidden="true"> *@
+@*                     <img src="@Url.Content("~/Content/images/StudentLogo.jpeg")" alt="Student" /> *@
+@*                 </div> *@
+@*                 <div class="role-option-title">Student / Needy Person</div> *@
+@*                 <p class="role-option-text">Receive refurbished electronics</p> *@
+@*             </button> *@
+@*         </div> *@
+
+@*         @if (TempData["Error"] != null || TempData["Success"] != null) *@
+@*         { *@
+@*             <div class="role-status-messages"> *@
+@*                 @if (TempData["Error"] != null) *@
+@*                 { *@
+@*                     <span class="badge" style="border-color:rgba(239,68,68,.28); background:rgba(239,68,68,.08); color:#b91c1c;">@TempData["Error"]</span> *@
+@*                 } *@
+@*                 @if (TempData["Success"] != null) *@
+@*                 { *@
+@*                     <span class="badge" style="border-color:rgba(16,185,129,.28); background:rgba(16,185,129,.08); color:#047857;">@TempData["Success"]</span> *@
+@*                 } *@
+@*             </div> *@
+@*         } *@
+
+@*                 @* Login / Sign Up switch. * @ *@
+@*         <div class="auth-toggle"> *@
+@*             <button type="button" id="loginTab" class="auth-tab @(mode == "login" ? "active" : "")">Login</button> *@
+@*             <button type="button" id="signupTab" class="auth-tab @(mode == "signup" ? "active" : "")">Sign Up</button> *@
+@*         </div> *@
+
+@*         <div class="role-form-shell"> *@
+@*             <div id="donorLoginPanel" class="role-panel"> *@
+@*                 @using (Html.BeginForm("DonorLogin", "Account", FormMethod.Post)) *@
+@*                 { *@
+@*                     @Html.AntiForgeryToken() *@
+@*                     <div class="role-form-grid single"> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Email</label> *@
+@*                             <input type="email" name="email" placeholder="Enter your email" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Password</label> *@
+@*                             <input type="password" name="password" placeholder="Enter your password" required /> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                     <div class="role-actions"> *@
+@*                         <button class="role-submit" type="submit">Login as Donor</button> *@
+@*                     </div> *@
+@*                 } *@
+@*                 <div class="forgot-wrap"> *@
+@*                     <button type="button" class="forgot-link" data-forgot-target="donorForgotPanel">Forgotten Password?</button> *@
+@*                 </div> *@
+@*                 <div id="donorForgotPanel" class="forgot-panel"> *@
+@*                     <h3 class="forgot-title">Recover donor password</h3> *@
+@*                     <p class="forgot-note">Enter your donor email and set a new password.</p> *@
+@*                     @using (Html.BeginForm("DonorForgotPassword", "Account", FormMethod.Post)) *@
+@*                     { *@
+@*                         @Html.AntiForgeryToken() *@
+@*                         <div class="role-form-grid"> *@
+@*                             <div class="role-field"> *@
+@*                                 <label>Email</label> *@
+@*                                 <input type="email" name="email" placeholder="Enter donor email" required /> *@
+@*                             </div> *@
+@*                             <div class="role-field"> *@
+@*                                 <label>New Password</label> *@
+@*                                 <input type="password" name="newPassword" placeholder="Enter new password" required /> *@
+@*                             </div> *@
+@*                             <div class="role-field" style="grid-column:1 / -1;"> *@
+@*                                 <label>Confirm New Password</label> *@
+@*                                 <input type="password" name="confirmPassword" placeholder="Confirm new password" required /> *@
+@*                             </div> *@
+@*                         </div> *@
+@*                         <div class="role-actions"> *@
+@*                             <button class="role-submit" type="submit">Recover Donor Password</button> *@
+@*                         </div> *@
+@*                     } *@
+@*                 </div> *@
+@*             </div> *@
+
+@*             <div id="donorSignupPanel" class="role-panel"> *@
+@*                 @using (Html.BeginForm("DonorSignUp", "Account", FormMethod.Post)) *@
+@*                 { *@
+@*                     @Html.AntiForgeryToken() *@
+@*                     <div class="role-form-grid"> *@
+@*                         <div class="role-field"> *@
+@*                             <label>User Name</label> *@
+@*                             <input type="text" name="userName" placeholder="Choose a username" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Name</label> *@
+@*                             <input type="text" name="name" placeholder="Enter your full name" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Email</label> *@
+@*                             <input type="email" name="email" placeholder="Enter your email" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Password</label> *@
+@*                             <input type="password" name="password" placeholder="Create password" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field" style="grid-column:1 / -1;"> *@
+@*                             <label>Confirm Password</label> *@
+@*                             <input type="password" name="confirmPassword" placeholder="Re-enter password" required /> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                     <div class="role-actions"> *@
+@*                         <button class="role-submit" type="submit">Sign Up as Donor</button> *@
+@*                     </div> *@
+@*                 } *@
+@*             </div> *@
+
+@*             <div id="studentLoginPanel" class="role-panel"> *@
+@*                 @using (Html.BeginForm("StudentLogin", "Account", FormMethod.Post)) *@
+@*                 { *@
+@*                     @Html.AntiForgeryToken() *@
+@*                     <div class="role-form-grid single"> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Email</label> *@
+@*                             <input type="email" name="email" placeholder="Enter your email" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Password</label> *@
+@*                             <input type="password" name="password" placeholder="Enter your password" required /> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                     <div class="role-actions"> *@
+@*                         <button class="role-submit" type="submit">Login as Student / Needy Person</button> *@
+@*                     </div> *@
+@*                 } *@
+@*                 <div class="forgot-wrap"> *@
+@*                     <button type="button" class="forgot-link" data-forgot-target="studentForgotPanel">Forgotten Password?</button> *@
+@*                 </div> *@
+@*                 <div id="studentForgotPanel" class="forgot-panel"> *@
+@*                     <h3 class="forgot-title">Recover student / needy person password</h3> *@
+@*                     <p class="forgot-note">Enter your account email and set a new password.</p> *@
+@*                     @using (Html.BeginForm("StudentForgotPassword", "Account", FormMethod.Post)) *@
+@*                     { *@
+@*                         @Html.AntiForgeryToken() *@
+@*                         <div class="role-form-grid"> *@
+@*                             <div class="role-field"> *@
+@*                                 <label>Email</label> *@
+@*                                 <input type="email" name="email" placeholder="Enter your email" required /> *@
+@*                             </div> *@
+@*                             <div class="role-field"> *@
+@*                                 <label>New Password</label> *@
+@*                                 <input type="password" name="newPassword" placeholder="Enter new password" required /> *@
+@*                             </div> *@
+@*                             <div class="role-field" style="grid-column:1 / -1;"> *@
+@*                                 <label>Confirm New Password</label> *@
+@*                                 <input type="password" name="confirmPassword" placeholder="Confirm new password" required /> *@
+@*                             </div> *@
+@*                         </div> *@
+@*                         <div class="role-actions"> *@
+@*                             <button class="role-submit" type="submit">Recover Student Password</button> *@
+@*                         </div> *@
+@*                     } *@
+@*                 </div> *@
+@*             </div> *@
+
+@*             <div id="studentSignupPanel" class="role-panel"> *@
+@*                 @using (Html.BeginForm("StudentSignUp", "Account", FormMethod.Post)) *@
+@*                 { *@
+@*                     @Html.AntiForgeryToken() *@
+@*                     <div class="role-form-grid"> *@
+@*                         <div class="role-field"> *@
+@*                             <label>User Name</label> *@
+@*                             <input type="text" name="userName" placeholder="Choose a username" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Name</label> *@
+@*                             <input type="text" name="name" placeholder="Enter your full name" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Email</label> *@
+@*                             <input type="email" name="email" placeholder="Enter your email" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Password</label> *@
+@*                             <input type="password" name="password" placeholder="Create password" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field" style="grid-column:1 / -1;"> *@
+@*                             <label>Confirm Password</label> *@
+@*                             <input type="password" name="confirmPassword" placeholder="Re-enter password" required /> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                     <div class="role-actions"> *@
+@*                         <button class="role-submit" type="submit">Sign Up as Student / Needy Person</button> *@
+@*                     </div> *@
+@*                 } *@
+@*             </div> *@
+
+@*             <div id="adminLoginPanel" class="role-panel"> *@
+@*                 @using (Html.BeginForm("AdminLogin", "Account", FormMethod.Post)) *@
+@*                 { *@
+@*                     @Html.AntiForgeryToken() *@
+@*                     <div class="role-form-grid single"> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Gmail Account</label> *@
+@*                             <input type="email" id="adminEmailInput" name="email" placeholder="Enter admin Gmail account" required /> *@
+@*                         </div> *@
+@*                         <div class="role-field"> *@
+@*                             <label>Password</label> *@
+@*                             <input type="password" id="adminPasswordInput" name="password" placeholder="Enter your password" required /> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                     <div class="role-actions"> *@
+@*                         <button class="role-submit" type="submit">Login as NGO / Admin</button> *@
+@*                     </div> *@
+@*                 } *@
+@*                 <div class="forgot-wrap"> *@
+@*                     <button type="button" class="forgot-link" data-forgot-target="adminForgotPanel">Forgotten Password?</button> *@
+@*                 </div> *@
+@*                 <div id="adminForgotPanel" class="forgot-panel"> *@
+@*                     <h3 class="forgot-title">Recover admin password</h3> *@
+@*                     <p class="forgot-note">Use the admin Gmail account to recover the password for the admin role.</p> *@
+@*                     @using (Html.BeginForm("AdminForgotPassword", "Account", FormMethod.Post)) *@
+@*                     { *@
+@*                         @Html.AntiForgeryToken() *@
+@*                         <div class="role-form-grid"> *@
+@*                             <div class="role-field"> *@
+@*                                 <label>Admin Gmail Account</label> *@
+@*                                 <input type="email" name="email" placeholder="Enter admin Gmail account" required /> *@
+@*                             </div> *@
+@*                             <div class="role-field"> *@
+@*                                 <label>New Password</label> *@
+@*                                 <input type="password" name="newPassword" placeholder="Enter new password" required /> *@
+@*                             </div> *@
+@*                             <div class="role-field" style="grid-column:1 / -1;"> *@
+@*                                 <label>Confirm New Password</label> *@
+@*                                 <input type="password" name="confirmPassword" placeholder="Confirm new password" required /> *@
+@*                             </div> *@
+@*                         </div> *@
+@*                         <div class="role-actions"> *@
+@*                             <button class="role-submit" type="submit">Recover Admin Password</button> *@
+@*                         </div> *@
+@*                     } *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
+
+@* <script> *@
+@*     var selectedRole = '@selectedRole'; *@
+@*     var currentMode = '@mode'; *@
+@*     var adminDefaultEmail = '@ViewBag.AdminEmail'; *@
+@*     var adminAltEmail = '@ViewBag.AdminAltEmail'; *@
+@*     var adminUserName = '@ViewBag.AdminUserName'; *@
+@*     var adminDefaultPassword = '@ViewBag.AdminPassword'; *@
+
+@*     function syncAdminPasswordAutoFill() { *@
+@*         var emailInput = document.getElementById('adminEmailInput'); *@
+@*         var passwordInput = document.getElementById('adminPasswordInput'); *@
+@*         if (!emailInput || !passwordInput) { *@
+@*             return; *@
+@*         } *@
+
+@*         var enteredValue = emailInput.value.trim().toLowerCase(); *@
+@*         if (enteredValue === adminDefaultEmail.toLowerCase() || enteredValue === adminAltEmail.toLowerCase() || enteredValue === adminUserName.toLowerCase()) { *@
+@*             passwordInput.value = adminDefaultPassword; *@
+@*         } *@
+@*     } *@
+
+@*     function closeForgotPanels() { *@
+@*         document.querySelectorAll('.forgot-panel').forEach(function (panel) { *@
+@*             panel.classList.remove('active'); *@
+@*         }); *@
+@*     } *@
+
+@*     function setRole(role) { *@
+@*         selectedRole = role; *@
+@*         if (selectedRole === 'admin') { *@
+@*             currentMode = 'login'; *@
+@*         } *@
+@*         closeForgotPanels(); *@
+@*         renderRoleUI(); *@
+@*     } *@
+
+@*     function setMode(mode) { *@
+@*         if (selectedRole === 'admin' && mode === 'signup') { *@
+@*             currentMode = 'login'; *@
+@*         } else { *@
+@*             currentMode = mode; *@
+@*         } *@
+@*         closeForgotPanels(); *@
+@*         renderRoleUI(); *@
+@*     } *@
+
+@*     function renderRoleUI() { *@
+@*         document.querySelectorAll('.role-option-card').forEach(function (card) { *@
+@*             card.classList.toggle('active', card.getAttribute('data-role') === selectedRole); *@
+@*         }); *@
+
+@*         var loginTab = document.getElementById('loginTab'); *@
+@*         var signupTab = document.getElementById('signupTab'); *@
+@*         loginTab.classList.toggle('active', currentMode === 'login'); *@
+@*         signupTab.classList.toggle('active', currentMode === 'signup'); *@
+
+@*         if (selectedRole === 'admin') { *@
+@*             signupTab.disabled = true; *@
+@*             signupTab.style.opacity = '0.55'; *@
+@*             signupTab.style.cursor = 'not-allowed'; *@
+@*         } else { *@
+@*             signupTab.disabled = false; *@
+@*             signupTab.style.opacity = '1'; *@
+@*             signupTab.style.cursor = 'pointer'; *@
+@*         } *@
+
+@*         document.querySelectorAll('.role-panel').forEach(function (panel) { *@
+@*             panel.classList.remove('active'); *@
+@*         }); *@
+
+@*         if (selectedRole === 'donor') { *@
+@*             document.getElementById(currentMode === 'signup' ? 'donorSignupPanel' : 'donorLoginPanel').classList.add('active'); *@
+@*         } else if (selectedRole === 'student') { *@
+@*             document.getElementById(currentMode === 'signup' ? 'studentSignupPanel' : 'studentLoginPanel').classList.add('active'); *@
+@*         } else { *@
+@*             document.getElementById('adminLoginPanel').classList.add('active'); *@
+@*         } *@
+@*     } *@
+
+@*     document.querySelectorAll('.role-option-card').forEach(function (card) { *@
+@*         card.addEventListener('click', function () { *@
+@*             setRole(this.getAttribute('data-role')); *@
+@*         }); *@
+@*     }); *@
+
+@*     document.getElementById('loginTab').addEventListener('click', function () { *@
+@*         setMode('login'); *@
+@*     }); *@
+
+@*     document.getElementById('signupTab').addEventListener('click', function () { *@
+@*         setMode('signup'); *@
+@*     }); *@
+
+@*     var adminEmailInput = document.getElementById('adminEmailInput'); *@
+@*     if (adminEmailInput) { *@
+@*         adminEmailInput.addEventListener('input', syncAdminPasswordAutoFill); *@
+@*         adminEmailInput.addEventListener('change', syncAdminPasswordAutoFill); *@
+@*         syncAdminPasswordAutoFill(); *@
+@*     } *@
+
+@*     document.querySelectorAll('.forgot-link').forEach(function (btn) { *@
+@*         btn.addEventListener('click', function () { *@
+@*             var targetId = this.getAttribute('data-forgot-target'); *@
+@*             var target = document.getElementById(targetId); *@
+@*             var shouldOpen = target && !target.classList.contains('active'); *@
+@*             closeForgotPanels(); *@
+@*             if (shouldOpen) { *@
+@*                 target.classList.add('active'); *@
+@*             } *@
+@*         }); *@
+@*     }); *@
+
+@*     renderRoleUI(); *@
+@* </script> *@

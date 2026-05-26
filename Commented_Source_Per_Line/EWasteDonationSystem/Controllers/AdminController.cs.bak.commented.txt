@@ -1,0 +1,195 @@
+<!-- using System; -->
+<!-- using System.Data.Entity; -->
+<!-- using System.Linq; -->
+<!-- using System.Web.Mvc; -->
+<!-- using EWasteDonationSystem.Models; -->
+
+<!-- namespace EWasteDonationSystem.Controllers -->
+<!-- { -->
+<!--     /// <summary> -->
+<!--     /// Admin dashboard (no login in this starter project). -->
+<!--     /// Admin can approve/reject donors and students. -->
+<!--     /// </summary> -->
+<!--     public class AdminController : Controller -->
+<!--     { -->
+<!--         private readonly AppDbContext _db = new AppDbContext(); -->
+
+<!--         [HttpGet] -->
+<!--         public ActionResult Dashboard() -->
+<!--         { -->
+<!--             if (!(Session["AdminLoggedIn"] is bool) || !(bool)Session["AdminLoggedIn"]) -->
+<!--             { -->
+<!--                 TempData["Error"] = "Admin login required."; -->
+<!--                 return RedirectToAction("ChooseRole", "Home"); -->
+<!--             } -->
+
+<!--             var totalDonors = _db.Donors.AsNoTracking().Count(); -->
+<!--             var totalStudents = _db.Students.AsNoTracking().Count(); -->
+<!--             var pendingDonors = _db.Donors.AsNoTracking().Count(d => d.Status == ApprovalStatus.Pending); -->
+<!--             var pendingStudents = _db.Students.AsNoTracking().Count(s => s.Status == ApprovalStatus.Pending); -->
+
+<!--             var donors = _db.Donors.AsNoTracking().OrderByDescending(d => d.Id).Take(8).ToList(); -->
+<!--             var students = _db.Students.AsNoTracking().OrderByDescending(s => s.Id).Take(8).ToList(); -->
+<!--             var donationItems = _db.DonationItems.AsNoTracking().Include(i => i.Donor).OrderByDescending(i => i.Id).Take(20).ToList(); -->
+<!--             var studentApplications = _db.StudentApplications.AsNoTracking().Include(a => a.Student).OrderByDescending(a => a.Id).Take(20).ToList(); -->
+
+<!--             var selectedDonor = donors.FirstOrDefault(); -->
+<!--             var selectedStudent = students.FirstOrDefault(); -->
+<!--             var previewMessages = _db.ChatMessages -->
+<!--                 .Where(x => (selectedDonor != null && x.DonorId == selectedDonor.Id) || (selectedStudent != null && x.StudentId == selectedStudent.Id)) -->
+<!--                 .AsNoTracking() -->
+<!--                 .OrderByDescending(x => x.SentAtUtc) -->
+<!--                 .Take(8) -->
+<!--                 .ToList() -->
+<!--                 .OrderBy(x => x.SentAtUtc) -->
+<!--                 .ToList(); -->
+
+<!--             var vm = new AdminDashboardVm -->
+<!--             { -->
+<!--                 TotalDonors = totalDonors, -->
+<!--                 TotalStudents = totalStudents, -->
+<!--                 PendingDonors = pendingDonors, -->
+<!--                 PendingStudents = pendingStudents, -->
+<!--                 TotalPickupAssignments = 0, -->
+<!--                 RecentDonorCount = donors.Count, -->
+<!--                 RecentStudentCount = students.Count, -->
+<!--                 Donors = donors, -->
+<!--                 Students = students, -->
+<!--                 DonationItems = donationItems, -->
+<!--                 StudentApplications = studentApplications, -->
+<!--                 PickupAgents = new System.Collections.Generic.List<AdminPickupAgentVm> -->
+<!--                 { -->
+<!--                     new AdminPickupAgentVm { AgentCode = "AGT-101", AgentName = "Pickup Team A - Hamza", Phone = "+92 300 8887711", Area = "Karachi" }, -->
+<!--                     new AdminPickupAgentVm { AgentCode = "AGT-102", AgentName = "Pickup Team B - Sana", Phone = "+92 301 4442200", Area = "Lahore" }, -->
+<!--                     new AdminPickupAgentVm { AgentCode = "AGT-438", AgentName = "Pickup Team C Ali", Phone = "0348 5498386", Area = "Peshawar" } -->
+<!--                 }, -->
+<!--                 PickupAssignments = new System.Collections.Generic.List<AdminPickupAssignmentVm>(), -->
+<!--                 SelectedChatTarget = selectedDonor != null ? "Donor" : "Student", -->
+<!--                 SelectedChatPerson = selectedDonor != null ? selectedDonor.FullName + " (" + selectedDonor.Status.ToString().ToLower() + ")" : (selectedStudent != null ? selectedStudent.FullName + " (" + selectedStudent.Status.ToString().ToLower() + ")" : "No users yet"), -->
+<!--                 PreviewMessages = previewMessages -->
+<!--             }; -->
+
+<!--             return View(vm); -->
+<!--         } -->
+
+<!--         [HttpPost] -->
+<!--         [ValidateAntiForgeryToken] -->
+<!--         public ActionResult SetDonorStatus(int id, ApprovalStatus status) -->
+<!--         { -->
+<!--             if (!(Session["AdminLoggedIn"] is bool) || !(bool)Session["AdminLoggedIn"]) -->
+<!--             { -->
+<!--                 TempData["Error"] = "Admin login required."; -->
+<!--                 return RedirectToAction("ChooseRole", "Home"); -->
+<!--             } -->
+<!--             var donor = _db.Donors.Find(id); -->
+<!--             if (donor == null) return HttpNotFound(); -->
+
+<!--             donor.Status = status; -->
+<!--             _db.SaveChanges(); -->
+<!--             return RedirectToAction("Dashboard"); -->
+<!--         } -->
+
+<!--         [HttpPost] -->
+<!--         [ValidateAntiForgeryToken] -->
+<!--         public ActionResult SetStudentStatus(int id, ApprovalStatus status) -->
+<!--         { -->
+<!--             if (!(Session["AdminLoggedIn"] is bool) || !(bool)Session["AdminLoggedIn"]) -->
+<!--             { -->
+<!--                 TempData["Error"] = "Admin login required."; -->
+<!--                 return RedirectToAction("ChooseRole", "Home"); -->
+<!--             } -->
+<!--             var student = _db.Students.Find(id); -->
+<!--             if (student == null) return HttpNotFound(); -->
+
+<!--             student.Status = status; -->
+<!--             _db.SaveChanges(); -->
+<!--             return RedirectToAction("Dashboard"); -->
+<!--         } -->
+
+<!--         [HttpGet] -->
+<!--         public ActionResult DonorDetail(int id) -->
+<!--         { -->
+<!--             if (!(Session["AdminLoggedIn"] is bool) || !(bool)Session["AdminLoggedIn"]) -->
+<!--             { -->
+<!--                 TempData["Error"] = "Admin login required."; -->
+<!--                 return RedirectToAction("ChooseRole", "Home"); -->
+<!--             } -->
+<!--             var donor = _db.Donors -->
+<!--                 .Include(d => d.DonationItems) -->
+<!--                 .Include(d => d.ChatMessages) -->
+<!--                 .FirstOrDefault(d => d.Id == id); -->
+
+<!--             if (donor == null) return HttpNotFound(); -->
+<!--             return View(donor); -->
+<!--         } -->
+
+<!--         [HttpGet] -->
+<!--         public ActionResult StudentDetail(int id) -->
+<!--         { -->
+<!--             if (!(Session["AdminLoggedIn"] is bool) || !(bool)Session["AdminLoggedIn"]) -->
+<!--             { -->
+<!--                 TempData["Error"] = "Admin login required."; -->
+<!--                 return RedirectToAction("ChooseRole", "Home"); -->
+<!--             } -->
+<!--             var student = _db.Students -->
+<!--                 .Include(s => s.Applications) -->
+<!--                 .Include(s => s.ChatMessages) -->
+<!--                 .FirstOrDefault(s => s.Id == id); -->
+
+<!--             if (student == null) return HttpNotFound(); -->
+<!--             return View(student); -->
+<!--         } -->
+
+<!--         [HttpPost] -->
+<!--         [ValidateAntiForgeryToken] -->
+<!--         public ActionResult SendMessageToDonor(int donorId, string message) -->
+<!--         { -->
+<!--             if (!(Session["AdminLoggedIn"] is bool) || !(bool)Session["AdminLoggedIn"]) -->
+<!--             { -->
+<!--                 TempData["Error"] = "Admin login required."; -->
+<!--                 return RedirectToAction("ChooseRole", "Home"); -->
+<!--             } -->
+<!--             if (string.IsNullOrWhiteSpace(message)) return RedirectToAction("DonorDetail", new { id = donorId }); -->
+
+<!--             _db.ChatMessages.Add(new ChatMessage -->
+<!--             { -->
+<!--                 DonorId = donorId, -->
+<!--                 SenderRole = "Admin", -->
+<!--                 Message = message.Trim(), -->
+<!--                 SentAtUtc = DateTime.UtcNow -->
+<!--             }); -->
+<!--             _db.SaveChanges(); -->
+
+<!--             return RedirectToAction("DonorDetail", new { id = donorId }); -->
+<!--         } -->
+
+<!--         [HttpPost] -->
+<!--         [ValidateAntiForgeryToken] -->
+<!--         public ActionResult SendMessageToStudent(int studentId, string message) -->
+<!--         { -->
+<!--             if (!(Session["AdminLoggedIn"] is bool) || !(bool)Session["AdminLoggedIn"]) -->
+<!--             { -->
+<!--                 TempData["Error"] = "Admin login required."; -->
+<!--                 return RedirectToAction("ChooseRole", "Home"); -->
+<!--             } -->
+<!--             if (string.IsNullOrWhiteSpace(message)) return RedirectToAction("StudentDetail", new { id = studentId }); -->
+
+<!--             _db.ChatMessages.Add(new ChatMessage -->
+<!--             { -->
+<!--                 StudentId = studentId, -->
+<!--                 SenderRole = "Admin", -->
+<!--                 Message = message.Trim(), -->
+<!--                 SentAtUtc = DateTime.UtcNow -->
+<!--             }); -->
+<!--             _db.SaveChanges(); -->
+
+<!--             return RedirectToAction("StudentDetail", new { id = studentId }); -->
+<!--         } -->
+
+<!--         protected override void Dispose(bool disposing) -->
+<!--         { -->
+<!--             if (disposing) _db.Dispose(); -->
+<!--             base.Dispose(disposing); -->
+<!--         } -->
+<!--     } -->
+<!-- } -->

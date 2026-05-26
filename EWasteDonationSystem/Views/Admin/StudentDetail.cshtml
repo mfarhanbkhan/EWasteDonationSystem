@@ -1,0 +1,105 @@
+@* Documented for easier understanding. *@
+@model EWasteDonationSystem.Models.Student
+@using System.Linq
+@{
+    ViewBag.Title = "Student Detail";
+    var latestApps = Model.Applications == null ? new List<EWasteDonationSystem.Models.StudentApplication>() : Model.Applications.OrderByDescending(x => x.Id).ToList();
+    var latestApp = latestApps.FirstOrDefault();
+    var statusClass = Model.Status == EWasteDonationSystem.Models.ApprovalStatus.Approved ? "ok" : (Model.Status == EWasteDonationSystem.Models.ApprovalStatus.Rejected ? "bad" : "warn");
+}
+
+<div class="container detail-screen">
+    <div class="topbar detail-topbar">
+        <div class="brand">
+            <div class="logo"><img src="@Url.Content("~/Content/images/StudentDetailLogo.jpeg")" alt="Logo" /></div>
+            <div>
+                <h1>Student/Needy Detail</h1>
+                <p>Shows student information and status approved, rejected or pending.</p>
+            </div>
+        </div>
+        <div class="nav">
+            <a class="chip detail-back" href="@Url.Action("Dashboard", "Admin")">Back to Students</a>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <section class="detail-card profile-card">
+            <div class="detail-card-head">
+                <h3>Profile</h3>
+                <div class="detail-meta-row">
+                    <span>ID: STD-@Model.Id.ToString("000000")</span>
+                    <span>Created: @Model.CreatedAtUtc.ToLocalTime().ToString("M/d/yyyy, h:mm:ss tt")</span>
+                    <span class="badge @statusClass">@Model.Status</span>
+                </div>
+            </div>
+            <div class="detail-card-body detail-profile-grid">
+                <div class="profile-field full"><label>Full Name</label><strong>@Model.FullName</strong></div>
+                <div class="profile-field"><label>Phone</label><strong>@(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)</strong></div>
+                <div class="profile-field"><label>Institute</label><strong>@(string.IsNullOrWhiteSpace(Model.Institute) ? "—" : Model.Institute)</strong></div>
+                <div class="profile-field"><label>City</label><strong>@(string.IsNullOrWhiteSpace(Model.City) ? "—" : Model.City)</strong></div>
+                <div class="profile-field"><label>Address</label><strong>@(string.IsNullOrWhiteSpace(Model.Address) ? "—" : Model.Address)</strong></div>
+            </div>
+        </section>
+
+        <section class="detail-card request-card">
+            <div class="detail-card-head">
+                <h3>Application Details</h3>
+                <p>Items needed + reason</p>
+            </div>
+            <div class="detail-card-body detail-application-stack">
+                <div class="profile-field full">
+                    <label>Items Needed</label>
+                    <strong>@(latestApp != null && !string.IsNullOrWhiteSpace(latestApp.ItemsNeeded) ? latestApp.ItemsNeeded : "—")</strong>
+                </div>
+                <div class="profile-field full">
+                    <label>Location</label>
+                    <strong>—</strong>
+                </div>
+                <div class="profile-field full">
+                    <label>Reason</label>
+                    <strong>@(latestApp != null && !string.IsNullOrWhiteSpace(latestApp.Reason) ? latestApp.Reason : "—")</strong>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <section class="detail-card chat-detail-card">
+        <div class="chat-detail-head">
+            <div class="chat-detail-tabs">
+                <span class="chip active">Chat</span>
+                <span class="small">Admin ↔ Student/Needy</span>
+            </div>
+            <a class="chip" href="@Url.Action("Dashboard", "Student", new { id = Model.Id })">Students Dashboard</a>
+        </div>
+
+        <div class="detail-chat-window">
+            @if (Model.ChatMessages == null || Model.ChatMessages.Count == 0)
+            {
+                <div class="chat-empty-note">No chat messages yet.</div>
+            }
+            else
+            {
+                foreach (var m in Model.ChatMessages.OrderBy(x => x.SentAtUtc))
+                {
+                    var mine = string.Equals(m.SenderRole, "Admin", System.StringComparison.OrdinalIgnoreCase);
+                    <div class="detail-bubble @(mine ? "mine" : "theirs")">
+                        <div>@m.Message</div>
+                        <small>@m.SentAtUtc.ToLocalTime().ToString("M/d/yyyy, h:mm:ss tt")</small>
+                    </div>
+                }
+            }
+        </div>
+
+        @using (Html.BeginForm("SendMessageToStudent", "Admin", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <div class="detail-chat-send">
+                <input type="hidden" name="studentId" value="@Model.Id" />
+                <input class="input" name="message" placeholder="(Demo) Send message as Student" />
+                <button class="btn primary" type="submit">Send</button>
+            </div>
+        }
+    </section>
+
+    <div class="footer">Student Detail —</div>
+</div>

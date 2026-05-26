@@ -1,0 +1,13 @@
+// Project documentation note: This file contains commented code for easier understanding.
+using System.Web.Mvc;
+
+namespace EWasteDonationSystem
+{
+    public class FilterConfig
+    {
+        public static void RegisterGlobalFilters(GlobalFilterCollection filters)
+        {
+            filters.Add(new HandleErrorAttribute());
+        }
+    }
+}

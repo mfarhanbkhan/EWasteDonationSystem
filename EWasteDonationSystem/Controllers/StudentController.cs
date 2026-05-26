@@ -1,0 +1,88 @@
+using System.Web.Mvc;
+using EWasteDonationSystem.Models;
+using EWasteDonationSystem.Service;
+
+namespace EWasteDonationSystem.Controllers
+{
+    /// <summary>
+    /// Thin student controller. Core work is delegated to StudentService.
+    /// </summary>
+    public class StudentController : Controller
+    {
+        private readonly AppDbContext _db = new AppDbContext();
+        private readonly StudentService _studentService;
+
+        public StudentController()
+        {
+            _studentService = new StudentService(_db);
+        }
+
+        [HttpGet]
+        public ActionResult Dashboard(int? id)
+        {
+            var vm = _studentService.BuildDashboard(Session, id);
+            return View(vm);
+        }
+
+        [HttpGet]
+        public ActionResult Detail(int? id)
+        {
+            var student = _studentService.GetDetail(Session, id);
+            if (!id.HasValue && Session["StudentId"] == null)
+            {
+                return RedirectToAction("Dashboard");
+            }
+            if (student == null)
+            {
+                return HttpNotFound();
+            }
+            return View(student);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SaveStudentPersonForm(StudentDashboardVm vm)
+        {
+            int studentId;
+            string message;
+            if (!_studentService.SaveStudentPersonForm(Session, vm, out studentId, out message))
+            {
+                TempData["Error"] = message;
+                return RedirectToAction("Dashboard", new { id = studentId });
+            }
+
+            TempData["Success"] = "Successfully Submitted";
+            return RedirectToAction("Dashboard", new { id = studentId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteMessageForMe(int studentId, int messageId)
+        {
+            _studentService.DeleteMessageForMe(Session, messageId, out studentId);
+            return RedirectToAction("Dashboard", new { id = studentId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteMessageForEveryone(int studentId, int messageId)
+        {
+            _studentService.DeleteMessageForEveryone(Session, messageId, out studentId);
+            return RedirectToAction("Dashboard", new { id = studentId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SendMessage(int studentId, string message)
+        {
+            _studentService.SendMessage(Session, message, out studentId);
+            return RedirectToAction("Dashboard", new { id = studentId });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) _db.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

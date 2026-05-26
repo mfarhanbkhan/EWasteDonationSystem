@@ -1,0 +1,79 @@
+// /* Documented for easier understanding. */
+// const id = getParam("id");
+//     const s = Store.get();
+//     const d = Store.findById(s.donors, id);
+
+//     function render(){
+//       if(!d){
+//         qs("#profileBox").innerHTML = "<div class='small'>Donor not found.</div>";
+//         return;
+//       }
+//       qs("#metaLine").innerHTML = `ID: <b>${d.id}</b> · Created: ${Store.fmtDate(d.createdAt)} · ${Store.statusBadge(d.status)}`;
+
+//       qs("#profileBox").innerHTML = `
+//         <div class="stack">
+//           <div><span class="small">Full Name</span><div style="font-weight:800; font-size:18px">${d.fullName}</div></div>
+//           <div class="split">
+//             <div><span class="small">Phone</span><div style="font-weight:650">${d.phone || "-"}</div></div>
+//             <div><span class="small">Email</span><div style="font-weight:650">${d.email || "-"}</div></div>
+//           </div>
+//           <div class="split">
+//             <div><span class="small">City</span><div style="font-weight:650">${d.city || "-"}</div></div>
+//             <div><span class="small">Address</span><div style="font-weight:650">${d.address || "-"}</div></div>
+//           </div>
+//         </div>
+//       `;
+
+//       const tb = qs("#itemsTable tbody");
+//       tb.innerHTML = "";
+//       (d.items || []).slice().reverse().forEach(it=>{
+//         const tr = document.createElement("tr");
+//         tr.innerHTML = `<td><img class="thumb" src="${it.img || '../assets/item-placeholder.svg'}" alt="item"></td>
+//             <td>${it.itemName}</td><td>${it.qty}</td><td>${it.category}</td><td>${it.condition}</td><td>${formatLocation(it.location)}</td>`;
+//         tb.appendChild(tr);
+//       });
+//       if((d.items || []).length === 0){
+//         const tr = document.createElement("tr");
+//         tr.innerHTML = `<td colspan="4" class="small">No items posted yet.</td>`;
+//         tb.appendChild(tr);
+//       }
+
+//       const assign = s.assignments.find(a=>a.donorId===d.id);
+//       if(assign){
+//         const ag = Store.findById(s.agents, assign.agentId);
+//         qs("#pickupInfo").innerHTML = `Pickup assignment: <b>${ag ? ag.name : assign.agentId}</b> · Assigned: ${Store.fmtDate(assign.assignedAt)}`;
+//       }else{
+//         qs("#pickupInfo").textContent = "Pickup assignment: Not assigned yet";
+//       }
+
+//       renderChat();
+//     }
+
+//     function renderChat(){
+//       const s2 = Store.get();
+//       const d2 = Store.findById(s2.donors, id);
+//       const box = qs("#chatMsgs");
+//       box.innerHTML = "";
+//       (d2?.chat || []).forEach(m=>{
+//         const div = document.createElement("div");
+//         div.className = "bubble " + (m.by === "donor" ? "me" : "them");
+//         div.innerHTML = `<div>${m.text}</div><div class="small" style="margin-top:6px">${Store.fmtDate(m.at)}</div>`;
+//         box.appendChild(div);
+//       });
+//       box.scrollTop = box.scrollHeight;
+//     }
+
+//     qs("#sendBtn").addEventListener("click", ()=>{
+//       const text = qs("#chatInput").value.trim();
+//       if(!text) return;
+//       Store.update(data=>{
+//         const dd = Store.findById(data.donors, id);
+//         if(!dd) return;
+//         dd.chat = dd.chat || [];
+//         dd.chat.push({ by:"donor", text, at: new Date().toISOString() });
+//       });
+//       qs("#chatInput").value="";
+//       renderChat();
+//     });
+
+//     render();
