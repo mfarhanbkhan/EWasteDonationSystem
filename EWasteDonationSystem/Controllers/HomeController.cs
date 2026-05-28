@@ -23,7 +23,7 @@ namespace EWasteDonationSystem.Controllers
             return View();
         }
 
-        public ActionResult ChooseRole(string role = "donor", string mode = "login", bool showOtp = false, string otpEmail = null)
+        public ActionResult ChooseRole(string role = "donor", string mode = "login", bool showOtp = false, string otpEmail = null, string otpRole = "donor")
         {
             using (var db = new AppDbContext())
             {
@@ -36,6 +36,7 @@ namespace EWasteDonationSystem.Controllers
 
             ViewBag.ShowOtpDialog = showOtp;
             ViewBag.OtpEmail = otpEmail ?? string.Empty;
+            ViewBag.OtpRole = (otpRole ?? role ?? "donor").ToLower();
 
             var vm = new ChooseRoleViewModel
             {

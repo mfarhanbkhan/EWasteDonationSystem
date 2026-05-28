@@ -62,6 +62,45 @@ namespace EWasteDonationSystem.Service
             return donor;
         }
 
+        public DonorItemDetailVm GetItemDetail(HttpSessionStateBase session, int? itemId)
+        {
+            // If an item wasn't specified, default to latest item for logged-in donor.
+            if (!itemId.HasValue && session["DonorId"] != null)
+            {
+                var donorId = (int)session["DonorId"];
+                var latest = _db.DonationItems.Where(x => x.DonorId == donorId).OrderByDescending(x => x.Id).FirstOrDefault();
+                if (latest != null) itemId = latest.Id;
+            }
+
+            if (!itemId.HasValue) return null;
+
+            var item = _db.DonationItems.Find(itemId.Value);
+            if (item == null) return null;
+
+            var donor = _db.Donors.Find(item.DonorId);
+            if (donor == null) return null;
+
+            var vm = new DonorItemDetailVm
+            {
+                Donor = donor,
+                SelectedItem = item,
+                OtherItems = _db.DonationItems
+                    .Where(x => x.DonorId == donor.Id && x.Id != item.Id)
+                    .OrderByDescending(x => x.Id)
+                    .Take(50)
+                    .ToList()
+            };
+
+            // Load chat messages (respecting "delete for me" hidden ids logic for donors).
+            var hiddenMessageIds = GetHiddenMessageIds(session, donor.Id);
+            vm.Chat = _db.ChatMessages
+                .Where(x => x.DonorId == donor.Id && !hiddenMessageIds.Contains(x.Id))
+                .OrderBy(x => x.SentAtUtc)
+                .ToList();
+
+            return vm;
+        }
+
         public bool SaveProfile(HttpSessionStateBase session, Donor donor, out int donorId, out string message)
         {
             donorId = session["DonorId"] == null ? 0 : (int)session["DonorId"];
@@ -101,19 +140,20 @@ namespace EWasteDonationSystem.Service
             var donor = _db.Donors.Find(donorId);
             if (donor == null)
             {
-                message = "Donor record was not found.";
+                message = "Donor record not found.";
                 return false;
             }
 
-            if (vm != null && vm.Donor != null)
-            {
-                donor.FullName = string.IsNullOrWhiteSpace(vm.Donor.FullName) ? donor.FullName : vm.Donor.FullName.Trim();
-                donor.Phone = vm.Donor.Phone;
-                donor.Email = vm.Donor.Email;
-                donor.City = vm.Donor.City;
-                donor.Address = vm.Donor.Address;
-                session["DonorName"] = donor.FullName;
-            }
+            //if (vm != null && vm.Donor != null)
+            //{
+            //    donor.FullName = string.IsNullOrWhiteSpace(vm.Donor.FullName) ? donor.FullName : vm.Donor.FullName.Trim();
+            //    donor.Phone = vm.Donor.Phone;
+            //    donor.Email = vm.Donor.Email;
+            //    donor.City = vm.Donor.City;
+            //    donor.Address = vm.Donor.Address;
+            //    session["DonorName"] = donor.FullName;
+            //}
+            session["DonorName"] = donor.FullName;
 
             var item = vm != null ? vm.DonationItem : null;
             if (item == null || string.IsNullOrWhiteSpace(item.ItemName))

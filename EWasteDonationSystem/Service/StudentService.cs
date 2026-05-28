@@ -23,6 +23,10 @@ namespace EWasteDonationSystem.Service
         {
             var vm = new StudentDashboardVm();
             vm.Students = _db.Students.OrderByDescending(x => x.Id).ToList();
+            vm.ApprovedDonationItems = _db.DonationItems
+                .Where(x => x.Status == ApprovalStatus.Approved)
+                .OrderByDescending(x => x.Id)
+                .ToList();
 
             if (!id.HasValue && session["StudentId"] != null)
             {
@@ -76,24 +80,42 @@ namespace EWasteDonationSystem.Service
                 return false;
             }
 
-            existing.FullName = (vm.Student.FullName ?? string.Empty).Trim();
-            existing.Phone = (vm.Student.Phone ?? string.Empty).Trim();
-            existing.Institute = (vm.Student.Institute ?? string.Empty).Trim();
-            existing.City = (vm.Student.City ?? string.Empty).Trim();
-            existing.Address = (vm.Student.Address ?? string.Empty).Trim();
+            //existing.FullName = (vm.Student.FullName ?? string.Empty).Trim();
+            //existing.Phone = (vm.Student.Phone ?? string.Empty).Trim();
+            //existing.Institute = (vm.Student.Institute ?? string.Empty).Trim();
+            //existing.City = (vm.Student.City ?? string.Empty).Trim();
+            //existing.Address = (vm.Student.Address ?? string.Empty).Trim();
             session["StudentName"] = existing.FullName;
 
-            var itemsNeeded = vm.Application != null ? (vm.Application.ItemsNeeded ?? string.Empty).Trim() : string.Empty;
+            var itemsNeededRaw = vm.Application != null ? (vm.Application.ItemsNeeded ?? string.Empty).Trim() : string.Empty;
             var reason = vm.Application != null ? (vm.Application.Reason ?? string.Empty).Trim() : string.Empty;
             if (string.IsNullOrWhiteSpace(existing.FullName))
             {
                 message = "Student/Needy Name is required.";
                 return false;
             }
-            if (string.IsNullOrWhiteSpace(itemsNeeded))
+
+            string itemsNeeded;
+            int donationItemId;
+            if (int.TryParse(itemsNeededRaw, out donationItemId))
+            {
+                var donationItem = _db.DonationItems.FirstOrDefault(x => x.Id == donationItemId && x.Status == ApprovalStatus.Approved);
+                if (donationItem == null)
+                {
+                    message = "Please select a valid approved donation item.";
+                    return false;
+                }
+
+                itemsNeeded = FormatDonationItemLabel(donationItem);
+            }
+            else if (string.IsNullOrWhiteSpace(itemsNeededRaw))
             {
                 message = "Item Needed is required.";
                 return false;
+            }
+            else
+            {
+                itemsNeeded = itemsNeededRaw;
             }
 
             _db.StudentApplications.Add(new StudentApplication
@@ -144,6 +166,14 @@ namespace EWasteDonationSystem.Service
             _db.ChatMessages.Add(new ChatMessage { StudentId = studentId, SenderRole = "Student", Message = messageText.Trim(), SentAtUtc = DateTime.UtcNow });
             _db.SaveChanges();
             return true;
+        }
+
+        private static string FormatDonationItemLabel(DonationItem item)
+        {
+            if (item == null) return string.Empty;
+            var category = string.IsNullOrWhiteSpace(item.Category) ? "—" : item.Category;
+            var condition = string.IsNullOrWhiteSpace(item.Condition) ? "—" : item.Condition;
+            return string.Format("{0} (Qty: {1}, {2}, {3})", item.ItemName, item.Quantity, category, condition);
         }
 
         private HashSet<int> GetHiddenMessageIds(HttpSessionStateBase session, int studentId)

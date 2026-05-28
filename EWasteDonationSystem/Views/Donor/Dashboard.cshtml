@@ -61,35 +61,6 @@
                     @*<div class="form-grid two-col donor-form-grid" style="max-width:980px; margin:0 auto; padding:12px 34px 26px; row-gap:20px; column-gap:28px;">*@
                     <div class="form-grid two-col donor-form-grid" style=" max-width: 980px; margin: 0 auto; padding: 12px 34px 26px; display: grid; grid-template-columns: repeat(3, 1fr); row-gap: 20px; column-gap: 28px;">
                         <div class="field">
-                            <label style="font-weight:700;">Donor Name</label>
-                            <input class="input" type="text" name="Donor.FullName" value="" placeholder="Enter donor name" required data-label="Donor Name" />
-                        </div>
-
-                        <div class="field">
-                            <label style="font-weight:700;">Phone</label>
-                            <input class="input" type="text" name="Donor.Phone" value="" placeholder="Enter phone number" required data-label="Phone" />
-                        </div>
-                        <div class="field">
-                            <label style="font-weight:700;">Email</label>
-                            <input class="input" type="email" name="Donor.Email" value="" placeholder="Enter email address" required data-label="Email" />
-                        </div>
-                        <div class="field">
-                            <label style="font-weight:700;">City</label>
-                            <input class="input" type="text" name="Donor.City" value="" placeholder="Enter city" required data-label="City" />
-                        </div>
-                        <div class="field">
-                            <label style="font-weight:700;">Address</label>
-                            <input class="input" type="text" name="Donor.Address" value="" placeholder="Street / Area / City" required data-label="Address" />
-                        </div>
-
-                        @*<div class="field">
-                        <label style="font-weight:700;">Pick Address on Map</label>
-                        <input id="deliveryAddress" class="input" type="text" placeholder="Select address manually" />
-                        <button type="button" onclick="goToCurrentLocation()" style="padding:6px 12px; margin-top:4px;">Use My Current Location</button>
-                        <div id="map" style="height: 300px; margin-top:10px;"></div>
-                    </div>*@
-
-                        <div class="field">
                             <label style="font-weight:700;">Item Name</label>
                             <input class="input" type="text" name="DonationItem.ItemName" value="" placeholder="Old laptop, smartphone, router..." required data-label="Item Name" />
                         </div>
@@ -116,6 +87,7 @@
                                 <option value="Wi-Fi Router">Wi-Fi Router</option>
                             </select>
                         </div>
+
                         <div class="field">
                             <label style="font-weight:700;">Condition</label>
                             <select class="input" name="DonationItem.Condition" required data-label="Condition">
@@ -126,6 +98,38 @@
                                 <option value="Used-Fair">Used-Fair</option>
                             </select>
                         </div>
+
+                        @*<div class="field">
+                                <label style="font-weight:700;">Donor Name</label>
+                                <input class="input" type="text" name="Donor.FullName" value="" placeholder="Enter donor name" required data-label="Donor Name" />
+                            </div>
+
+                            <div class="field">
+                                <label style="font-weight:700;">Phone</label>
+                                <input class="input" type="text" name="Donor.Phone" value="" placeholder="Enter phone number" required data-label="Phone" />
+                            </div>
+                            <div class="field">
+                                <label style="font-weight:700;">Email</label>
+                                <input class="input" type="email" name="Donor.Email" value="" placeholder="Enter email address" required data-label="Email" />
+                            </div>*@
+                        <div class="field">
+                            <label style="font-weight:700;">City</label>
+                            <input class="input" type="text" name="Donor.City" value="" placeholder="Enter city" required data-label="City" />
+                        </div>
+                        <div class="field">
+                            <label style="font-weight:700;">Address</label>
+                            <input class="input" type="text" name="Donor.Address" value="" placeholder="Street / Area / City" required data-label="Address" />
+                        </div>
+
+                        @*<div class="field">
+                                <label style="font-weight:700;">Pick Address on Map</label>
+                                <input id="deliveryAddress" class="input" type="text" placeholder="Select address manually" />
+                                <button type="button" onclick="goToCurrentLocation()" style="padding:6px 12px; margin-top:4px;">Use My Current Location</button>
+                                <div id="map" style="height: 300px; margin-top:10px;"></div>
+                            </div>*@
+
+
+
                         <div class="field full">
                             <label style="font-weight:700;">Item Image</label>
                             <input class="input" name="itemImage" type="file" accept="image/*" />
@@ -184,8 +188,8 @@
                                             <span class="badge">No Image</span>
                                         }
                                     </td>
-                                    <td><span class="badge @statusClass">@donorProfile.Status</span></td>
-                                    <td><a class="iconbtn" title="Open detail" href="@Url.Action("Detail", "Donor", new { id = donorProfile.Id })">&#128065;</a></td>
+                                    <td><span class="badge @statusClass">@item.Status</span></td>
+                                    <td><a class="iconbtn" title="Open detail" href="@Url.Action("Detail", "Donor", new { id = item.Id })">&#128065;</a></td>
                                 </tr>
                             }
                         }

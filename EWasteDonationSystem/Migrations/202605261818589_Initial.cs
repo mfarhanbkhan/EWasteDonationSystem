@@ -3,7 +3,7 @@
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class InitialMigration : DbMigration
+    public partial class Initial : DbMigration
     {
         public override void Up()
         {
@@ -51,10 +51,12 @@
                         DonorId = c.Int(nullable: false),
                         ItemName = c.String(nullable: false, maxLength: 120),
                         Quantity = c.Int(nullable: false),
+                        Price = c.Decimal(nullable: false, precision: 18, scale: 2),
                         Category = c.String(maxLength: 80),
                         Condition = c.String(maxLength: 60),
                         ImagePath = c.String(maxLength: 260),
                         Notes = c.String(maxLength: 500),
+                        Status = c.Int(nullable: false),
                         CreatedAtUtc = c.DateTime(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
@@ -75,6 +77,9 @@
                         Address = c.String(maxLength: 200),
                         Status = c.Int(nullable: false),
                         CreatedAtUtc = c.DateTime(nullable: false),
+                        EmailOtp = c.String(maxLength: 200),
+                        OtpExpiresAt = c.DateTime(),
+                        IsEmailVerified = c.Boolean(nullable: false),
                     })
                 .PrimaryKey(t => t.Id);
             
@@ -86,6 +91,7 @@
                         StudentId = c.Int(nullable: false),
                         ItemsNeeded = c.String(nullable: false, maxLength: 500),
                         Reason = c.String(maxLength: 800),
+                        Status = c.Int(nullable: false),
                         CreatedAtUtc = c.DateTime(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)

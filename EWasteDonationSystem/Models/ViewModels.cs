@@ -36,6 +36,7 @@ namespace EWasteDonationSystem.Models
 
             Students = new List<Student>();
             LatestApplications = new List<StudentApplication>();
+            ApprovedDonationItems = new List<DonationItem>();
             Chat = new List<ChatMessage>();
         }
 
@@ -44,8 +45,20 @@ namespace EWasteDonationSystem.Models
 
         public List<Student> Students { get; set; }
         public List<StudentApplication> LatestApplications { get; set; }
+        public List<DonationItem> ApprovedDonationItems { get; set; }
 
         public List<ChatMessage> Chat { get; set; }
+    }
+
+    /// <summary>
+    /// Detail page model for a donor + a specific selected donation item.
+    /// </summary>
+    public class DonorItemDetailVm
+    {
+        public Donor Donor { get; set; }
+        public DonationItem SelectedItem { get; set; }
+        public List<DonationItem> OtherItems { get; set; } = new List<DonationItem>();
+        public List<ChatMessage> Chat { get; set; } = new List<ChatMessage>();
     }
 
     public class AdminDashboardVm

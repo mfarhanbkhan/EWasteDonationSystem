@@ -57,7 +57,7 @@ namespace EWasteDonationSystem.Controllers
             if (_accountService.TryDonorSignUp(userName, name, email, password, confirmPassword, out message))
             {
                 TempData["Success"] = "OTP sent to your email. Please verify your account before logging in.";
-                return RedirectToAction("ChooseRole", "Home", new { role = "donor", mode = "login", showOtp = true, otpEmail = email?.Trim() });
+                return RedirectToAction("ChooseRole", "Home", new { role = "donor", mode = "login", showOtp = true, otpEmail = email?.Trim(), otpRole = "donor" });
             }
 
             TempData["Error"] = message;
@@ -76,15 +76,24 @@ namespace EWasteDonationSystem.Controllers
             }
 
             TempData["Error"] = message;
-            return RedirectToAction("ChooseRole", "Home", new { role = "donor", mode = "login", showOtp = true, otpEmail = email?.Trim() });
+            return RedirectToAction("ChooseRole", "Home", new { role = "donor", mode = "login", showOtp = true, otpEmail = email?.Trim(), otpRole = "donor" });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DonorForgotPassword(string email, string newPassword, string confirmPassword)
+        public JsonResult SendDonorPasswordResetOtp(string email)
         {
             string message;
-            if (_accountService.TryRecoverDonorPassword(email, newPassword, confirmPassword, out message))
+            var success = _accountService.TrySendDonorPasswordResetOtp(email, out message);
+            return Json(new { success, message });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DonorForgotPassword(string email, string otp, string newPassword, string confirmPassword)
+        {
+            string message;
+            if (_accountService.TryRecoverDonorPassword(email, otp, newPassword, confirmPassword, out message))
             {
                 TempData["Success"] = message;
             }
@@ -118,8 +127,8 @@ namespace EWasteDonationSystem.Controllers
             string message;
             if (_accountService.TryStudentSignUp(userName, name, email, password, confirmPassword, out message))
             {
-                TempData["Success"] = "Successfully Sign up";
-                return RedirectToAction("ChooseRole", "Home", new { role = "student", mode = "login" });
+                TempData["Success"] = "OTP sent to your email. Please verify your account before logging in.";
+                return RedirectToAction("ChooseRole", "Home", new { role = "student", mode = "login", showOtp = true, otpEmail = email?.Trim(), otpRole = "student" });
             }
 
             TempData["Error"] = message;
@@ -128,10 +137,34 @@ namespace EWasteDonationSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult StudentForgotPassword(string email, string newPassword, string confirmPassword)
+        public ActionResult VerifyStudentOtp(string email, string otp)
         {
             string message;
-            if (_accountService.TryRecoverStudentPassword(email, newPassword, confirmPassword, out message))
+            if (_accountService.VerifyStudentOtp(email, otp, out message))
+            {
+                TempData["Success"] = message;
+                return RedirectToAction("ChooseRole", "Home", new { role = "student", mode = "login" });
+            }
+
+            TempData["Error"] = message;
+            return RedirectToAction("ChooseRole", "Home", new { role = "student", mode = "login", showOtp = true, otpEmail = email?.Trim(), otpRole = "student" });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult SendStudentPasswordResetOtp(string email)
+        {
+            string message;
+            var success = _accountService.TrySendStudentPasswordResetOtp(email, out message);
+            return Json(new { success, message });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult StudentForgotPassword(string email, string otp, string newPassword, string confirmPassword)
+        {
+            string message;
+            if (_accountService.TryRecoverStudentPassword(email, otp, newPassword, confirmPassword, out message))
             {
                 TempData["Success"] = message;
             }

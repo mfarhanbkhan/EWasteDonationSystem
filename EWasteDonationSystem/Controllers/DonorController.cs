@@ -28,16 +28,18 @@ namespace EWasteDonationSystem.Controllers
         [HttpGet]
         public ActionResult Detail(int? id)
         {
-            var donor = _donorService.GetDetail(Session, id);
+            // IMPORTANT: Dashboard passes DonationItem.Id into this action.
+            // So in this page, "id" means itemId (not donorId).
+            var vm = _donorService.GetItemDetail(Session, id);
             if (!id.HasValue && Session["DonorId"] == null)
             {
                 return RedirectToAction("Dashboard");
             }
-            if (donor == null)
+            if (vm == null)
             {
                 return HttpNotFound();
             }
-            return View(donor);
+            return View(vm);
         }
 
         [HttpPost]

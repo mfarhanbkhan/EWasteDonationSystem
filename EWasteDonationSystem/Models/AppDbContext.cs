@@ -22,6 +22,7 @@ namespace EWasteDonationSystem.Models
         public DbSet<Donor> Donors { get; set; }
         public DbSet<DonationItem> DonationItems { get; set; }
         public DbSet<Student> Students { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<StudentApplication> StudentApplications { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
 

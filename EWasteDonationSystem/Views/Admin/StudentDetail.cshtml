@@ -29,7 +29,7 @@
                 <div class="detail-meta-row">
                     <span>ID: STD-@Model.Id.ToString("000000")</span>
                     <span>Created: @Model.CreatedAtUtc.ToLocalTime().ToString("M/d/yyyy, h:mm:ss tt")</span>
-                    <span class="badge @statusClass">@Model.Status</span>
+                    <span class="badge @statusClass">@latestApp.Status</span>
                 </div>
             </div>
             <div class="detail-card-body detail-profile-grid">

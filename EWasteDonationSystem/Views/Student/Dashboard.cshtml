@@ -6,6 +6,7 @@
     ViewBag.Title = "Students / Needy Person";
     var studentVm = Model ?? new StudentDashboardVm();
     var studentProfile = studentVm.Student ?? new Student();
+    var approvedItems = studentVm.ApprovedDonationItems ?? new List<DonationItem>();
     var activeId = studentProfile.Id;
     var isLoggedIn = Session["StudentId"] != null;
     var studentName = Session["StudentName"] as string;
@@ -49,30 +50,51 @@
 
     @if (!isAdminView)
     {
-    <div class="card form-card section-gap student-form-card">
-        <div class="head"><h3>Student/Needy Person Form</h3><p>Fill all information in one form and then check detail.</p></div>
-        <div class="body student-form-body">
-            @using (Html.BeginForm("SaveStudentPersonForm", "Student", FormMethod.Post, new { data_ajax_form = "true", @class = "client-validate-form" }))
-            {
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="Student.Id" value="@studentProfile.Id" />
-                <input type="hidden" name="Application.StudentId" value="@studentProfile.Id" />
-                <div class="form compact-form student-form-grid">
-                    <div class="field full"><label>Student/Needy Name</label><input class="input" type="text" name="Student.FullName" value="" placeholder="Student/Needy Name" required data-label="Student/Needy Name" /></div>
-                    <div class="field"><label>Phone Number</label><input class="input" type="text" name="Student.Phone" value="" placeholder="+92 301 7700123" required data-label="Phone Number" /></div>
-                    <div class="field"><label>Institute</label><input class="input" type="text" name="Student.Institute" value="" placeholder="Govt College" required data-label="Institute" /></div>
-                    <div class="field"><label>City</label><input class="input" type="text" name="Student.City" value="" placeholder="Dera Ismail Khan" required data-label="City" /></div>
-                    <div class="field"><label>Address</label><input class="input" type="text" name="Student.Address" value="" placeholder="Street / Area / City" required data-label="Address" /></div>
-                    <div class="field full"><label>Item Needed</label><textarea class="input" name="Application.ItemsNeeded" placeholder="Laptop for study (any working condition)." required data-label="Item Needed"></textarea></div>
-                    <div class="field full"><label>Reason / Detail</label><textarea class="input" name="Application.Reason" placeholder="Final year project + online classes." required data-label="Reason / Detail"></textarea></div>
-                </div>
-                <div class="hr"></div>
-                <div class="student-form-actions" style="padding-top:8px; padding-bottom:10px;">
-                    <button class="btn ok" type="submit">Submit Student/Needy Person Detail</button>
-                </div>
-            }
+        <div class="card form-card section-gap student-form-card">
+            <div class="head"><h3>Student/Needy Person Form</h3><p>Fill all information in one form and then check detail.</p></div>
+            <div class="body student-form-body">
+                @using (Html.BeginForm("SaveStudentPersonForm", "Student", FormMethod.Post, new { data_ajax_form = "true", @class = "client-validate-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Student.Id" value="@studentProfile.Id" />
+                    <input type="hidden" name="Application.StudentId" value="@studentProfile.Id" />
+                    <div class="form compact-form student-form-grid">
+                        <div class="field full">
+                            <label>Item Needed</label>
+                            @if (!approvedItems.Any())
+                            {
+                                <select class="input" disabled data-label="Item Needed">
+                                    <option value="">No approved donation items available</option>
+                                </select>
+                                <div class="small" style="margin-top:8px; opacity:.85;">Please check back later when admin approves donation items.</div>
+                            }
+                            else
+                            {
+                                <select class="input" name="Application.ItemsNeeded" required data-label="Item Needed">
+                                    <option value="">Select an approved item</option>
+                                    @foreach (var item in approvedItems)
+                                    {
+                                        var category = string.IsNullOrWhiteSpace(item.Category) ? "—" : item.Category;
+                                        var condition = string.IsNullOrWhiteSpace(item.Condition) ? "—" : item.Condition;
+                                        <option value="@item.ItemName">@item.ItemName (@category, @condition)</option>
+                                    }
+                                </select>
+                            }
+                        </div>
+
+                        <div class="field"><label>Phone Number</label><input class="input" type="text" name="Student.Phone" value="" placeholder="+92 301 7700123" required data-label="Phone Number" /></div>
+                        <div class="field"><label>Institute</label><input class="input" type="text" name="Student.Institute" value="" placeholder="Govt College" required data-label="Institute" /></div>
+                        <div class="field"><label>City</label><input class="input" type="text" name="Student.City" value="" placeholder="Dera Ismail Khan" required data-label="City" /></div>
+                        <div class="field"><label>Address</label><input class="input" type="text" name="Student.Address" value="" placeholder="Street / Area / City" required data-label="Address" /></div>
+                        <div class="field full"><label>Reason / Detail</label><textarea class="input" name="Application.Reason" placeholder="Final year project + online classes." required data-label="Reason / Detail"></textarea></div>
+                    </div>
+                    <div class="hr"></div>
+                    <div class="student-form-actions" style="padding-top:8px; padding-bottom:10px;">
+                        <button class="btn ok" type="submit">Submit Student/Needy Person Detail</button>
+                    </div>
+                }
+            </div>
         </div>
-    </div>
     }
     <div class="dashboard-two-col section-gap bottom-align">
         <div class="card list-card">

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Web.UI;
 
 namespace EWasteDonationSystem.Models
 {
@@ -46,6 +47,12 @@ namespace EWasteDonationSystem.Models
         public ApprovalStatus Status { get; set; }
 
         public DateTime CreatedAtUtc { get; set; }
+
+        //new fields
+        [StringLength(200)]
+        public string EmailOtp { get; set; }
+        public DateTime? OtpExpiresAt { get; set; } = DateTime.UtcNow;
+        public bool IsEmailVerified { get; set; }
 
         // Navigation
         public virtual ICollection<StudentApplication> Applications { get; set; }

@@ -118,12 +118,13 @@ namespace EWasteDonationSystem.Controllers
         }
 
         [HttpGet]
-        public ActionResult DonorDetail(int id)
+        public ActionResult DonorDetail(int? id, int? donorId)
         {
             if (!_adminService.IsAdminLoggedIn(Session)) return RedirectToAdminLogin();
-            var donor = _adminService.GetDonorDetail(id);
-            if (donor == null) return HttpNotFound();
-            return View(donor);
+            // id = DonationItem.Id from dashboard; donorId = optional fallback when opening by donor only.
+            var vm = _adminService.GetDonorItemDetail(id, donorId);
+            if (vm == null) return HttpNotFound();
+            return View(vm);
         }
 
         [HttpGet]
@@ -137,11 +138,13 @@ namespace EWasteDonationSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult SendMessageToDonor(int donorId, string message)
+        public ActionResult SendMessageToDonor(int donorId, string message, int? itemId)
         {
             if (!_adminService.IsAdminLoggedIn(Session)) return RedirectToAdminLogin();
             _adminService.SendMessageToDonor(donorId, message);
-            return RedirectToAction("DonorDetail", new { id = donorId });
+            if (itemId.HasValue)
+                return RedirectToAction("DonorDetail", new { id = itemId });
+            return RedirectToAction("DonorDetail", new { donorId = donorId });
         }
 
         [HttpPost]

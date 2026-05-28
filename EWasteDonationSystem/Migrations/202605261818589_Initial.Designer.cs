@@ -7,13 +7,13 @@ namespace EWasteDonationSystem.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
-    public sealed partial class StatusField : IMigrationMetadata
+    public sealed partial class Initial : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(StatusField));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Initial));
         
         string IMigrationMetadata.Id
         {
-            get { return "202605260501585_StatusField"; }
+            get { return "202605261818589_Initial"; }
         }
         
         string IMigrationMetadata.Source

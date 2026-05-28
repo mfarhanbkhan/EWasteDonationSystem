@@ -94,17 +94,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202605250504490_InitialMigration.cs" />
-    <Compile Include="Migrations\202605250504490_InitialMigration.Designer.cs">
-      <DependentUpon>202605250504490_InitialMigration.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202605260204416_PriceField.cs" />
-    <Compile Include="Migrations\202605260204416_PriceField.Designer.cs">
-      <DependentUpon>202605260204416_PriceField.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202605260501585_StatusField.cs" />
-    <Compile Include="Migrations\202605260501585_StatusField.Designer.cs">
-      <DependentUpon>202605260501585_StatusField.cs</DependentUpon>
+    <Compile Include="Migrations\202605261818589_Initial.cs" />
+    <Compile Include="Migrations\202605261818589_Initial.Designer.cs">
+      <DependentUpon>202605261818589_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApprovalStatus.cs" />
@@ -115,6 +107,7 @@
     <Compile Include="Models\Donor.cs" />
     <Compile Include="Models\Student.cs" />
     <Compile Include="Models\StudentApplication.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Models\ViewModels.cs" />
     <Compile Include="Service\AccountService.cs" />
     <Compile Include="Service\AdminService.cs" />
@@ -150,14 +143,8 @@
     <Folder Include="Content\uploads\" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202605250504490_InitialMigration.resx">
-      <DependentUpon>202605250504490_InitialMigration.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202605260204416_PriceField.resx">
-      <DependentUpon>202605260204416_PriceField.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202605260501585_StatusField.resx">
-      <DependentUpon>202605260501585_StatusField.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202605261818589_Initial.resx">
+      <DependentUpon>202605261818589_Initial.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

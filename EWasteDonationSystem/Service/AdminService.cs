@@ -247,6 +247,45 @@ namespace EWasteDonationSystem.Service
             return _db.Donors.Include(d => d.DonationItems).Include(d => d.ChatMessages).FirstOrDefault(d => d.Id == id);
         }
 
+        /// <summary>
+        /// Loads donor profile + selected donation item for the admin detail page.
+        /// id = DonationItem.Id; donorId = fallback when opening by donor only (latest item).
+        /// </summary>
+        public DonorItemDetailVm GetDonorItemDetail(int? itemId, int? donorId)
+        {
+            if (!itemId.HasValue && donorId.HasValue)
+            {
+                var latest = _db.DonationItems
+                    .Where(x => x.DonorId == donorId.Value)
+                    .OrderByDescending(x => x.Id)
+                    .FirstOrDefault();
+                if (latest != null) itemId = latest.Id;
+            }
+
+            if (!itemId.HasValue) return null;
+
+            var item = _db.DonationItems.Find(itemId.Value);
+            if (item == null) return null;
+
+            var donor = _db.Donors.Find(item.DonorId);
+            if (donor == null) return null;
+
+            return new DonorItemDetailVm
+            {
+                Donor = donor,
+                SelectedItem = item,
+                OtherItems = _db.DonationItems
+                    .Where(x => x.DonorId == donor.Id && x.Id != item.Id)
+                    .OrderByDescending(x => x.Id)
+                    .Take(50)
+                    .ToList(),
+                Chat = _db.ChatMessages
+                    .Where(x => x.DonorId == donor.Id)
+                    .OrderBy(x => x.SentAtUtc)
+                    .ToList()
+            };
+        }
+
         public Student GetStudentDetail(int id)
         {
             return _db.Students.Include(s => s.Applications).Include(s => s.ChatMessages).FirstOrDefault(s => s.Id == id);

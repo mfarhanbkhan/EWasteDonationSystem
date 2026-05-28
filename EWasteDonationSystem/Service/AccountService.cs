@@ -164,11 +164,52 @@ namespace EWasteDonationSystem.Service
         }
 
         /// <summary>
-        /// Update donor password by email.
+        /// Generate and email an OTP for donor password reset.
         /// </summary>
-        public bool TryRecoverDonorPassword(string email, string newPassword, string confirmPassword, out string message)
+        public bool TrySendDonorPasswordResetOtp(string email, out string message)
         {
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                message = "Please enter your donor email.";
+                return false;
+            }
+
+            var normalizedEmail = email.Trim();
+            var donor = _db.Donors.FirstOrDefault(x => x.Email != null && x.Email.Equals(normalizedEmail, StringComparison.OrdinalIgnoreCase));
+            if (donor == null)
+            {
+                message = "Donor email not found.";
+                return false;
+            }
+
+            if (!donor.IsEmailVerified)
+            {
+                message = "Email not verified. Please verify your account before resetting your password.";
+                return false;
+            }
+
+            var otp = GenerateOtp();
+            donor.EmailOtp = otp;
+            donor.OtpExpiresAt = DateTime.UtcNow.AddMinutes(10);
+            _db.SaveChanges();
+
+            _emailService.SendEmail(
+                toAddress: normalizedEmail,
+                subject: "Your OTP for Donor Password Reset",
+                body: $"Your password reset OTP is: <b>{otp}</b>. It is valid for 10 minutes.",
+                isHtml: true
+            );
+
+            message = "OTP sent to your email.";
+            return true;
+        }
+
+        /// <summary>
+        /// Update donor password by email after OTP verification.
+        /// </summary>
+        public bool TryRecoverDonorPassword(string email, string otp, string newPassword, string confirmPassword, out string message)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otp) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
             {
                 message = "Please fill all donor forgotten password fields.";
                 return false;
@@ -194,7 +235,21 @@ namespace EWasteDonationSystem.Service
                 return false;
             }
 
+            if (donor.OtpExpiresAt == null || donor.OtpExpiresAt < DateTime.UtcNow)
+            {
+                message = "OTP expired. Please request a new one.";
+                return false;
+            }
+
+            if (!string.Equals(donor.EmailOtp, otp.Trim(), StringComparison.Ordinal))
+            {
+                message = "Invalid OTP.";
+                return false;
+            }
+
             donor.Password = HashPassword(newPassword.Trim());
+            donor.EmailOtp = null;
+            donor.OtpExpiresAt = null;
             _db.SaveChanges();
             message = "Donor password recovered successfully. Please login now.";
             return true;
@@ -274,6 +329,7 @@ namespace EWasteDonationSystem.Service
                 return false;
             }
 
+            var otp = GenerateOtp();
             _db.Students.Add(new Student
             {
                 Phone = userName.Trim(),
@@ -281,20 +337,71 @@ namespace EWasteDonationSystem.Service
                 Email = normalizedEmail,
                 Password = HashPassword(password.Trim()),
                 Status = ApprovalStatus.Pending,
+                EmailOtp = otp,
+                OtpExpiresAt = DateTime.UtcNow.AddMinutes(10), // OTP valid for 10 minutes
+                IsEmailVerified = false,
                 CreatedAtUtc = DateTime.UtcNow
             });
             _db.SaveChanges();
 
-            message = "Student sign up successful. Please login now.";
+            _emailService.SendEmail(
+                toAddress: normalizedEmail,
+                subject: "Your OTP for Student Sign-Up",
+                body: $"Your OTP is: <b>{otp}</b>. It is valid for 10 minutes.",
+                isHtml: true
+            );
+
+            message = "Student sign up successful. Please verify your email before logging in.";
             return true;
         }
 
         /// <summary>
-        /// Update student password by email.
+        /// Generate and email an OTP for student password reset.
         /// </summary>
-        public bool TryRecoverStudentPassword(string email, string newPassword, string confirmPassword, out string message)
+        public bool TrySendStudentPasswordResetOtp(string email, out string message)
         {
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                message = "Please enter your email.";
+                return false;
+            }
+
+            var normalizedEmail = email.Trim();
+            var student = _db.Students.FirstOrDefault(x => x.Email != null && x.Email.Equals(normalizedEmail, StringComparison.OrdinalIgnoreCase));
+            if (student == null)
+            {
+                message = "Student email not found.";
+                return false;
+            }
+
+            if (!student.IsEmailVerified)
+            {
+                message = "Email not verified. Please verify your account before resetting your password.";
+                return false;
+            }
+
+            var otp = GenerateOtp();
+            student.EmailOtp = otp;
+            student.OtpExpiresAt = DateTime.UtcNow.AddMinutes(10);
+            _db.SaveChanges();
+
+            _emailService.SendEmail(
+                toAddress: normalizedEmail,
+                subject: "Your OTP for Student Password Reset",
+                body: $"Your password reset OTP is: <b>{otp}</b>. It is valid for 10 minutes.",
+                isHtml: true
+            );
+
+            message = "OTP sent to your email.";
+            return true;
+        }
+
+        /// <summary>
+        /// Update student password by email after OTP verification.
+        /// </summary>
+        public bool TryRecoverStudentPassword(string email, string otp, string newPassword, string confirmPassword, out string message)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otp) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
             {
                 message = "Please fill all student forgotten password fields.";
                 return false;
@@ -320,7 +427,21 @@ namespace EWasteDonationSystem.Service
                 return false;
             }
 
+            if (student.OtpExpiresAt == null || student.OtpExpiresAt < DateTime.UtcNow)
+            {
+                message = "OTP expired. Please request a new one.";
+                return false;
+            }
+
+            if (!string.Equals(student.EmailOtp, otp.Trim(), StringComparison.Ordinal))
+            {
+                message = "Invalid OTP.";
+                return false;
+            }
+
             student.Password = HashPassword(newPassword.Trim());
+            student.EmailOtp = null;
+            student.OtpExpiresAt = null;
             _db.SaveChanges();
             message = "Student password recovered successfully. Please login now.";
             return true;
@@ -347,9 +468,15 @@ namespace EWasteDonationSystem.Service
                 return false;
             }
 
+            if (!student.IsEmailVerified)
+            {
+                message = "Email not verified. Please verify your email and try again!";
+                return false;
+            }
+
             if (!string.IsNullOrEmpty(upgradedStudentPassword))
             {
-                student.Password = upgradedStudentPassword;
+                //student.Password = upgradedStudentPassword;
                 _db.SaveChanges();
             }
 
@@ -514,6 +641,43 @@ namespace EWasteDonationSystem.Service
             donor.Status = ApprovalStatus.Approved; // Or whatever you use for active accounts
             donor.EmailOtp = null;
             donor.OtpExpiresAt = null;
+            _db.SaveChanges();
+
+            message = "Email verified successfully!";
+            return true;
+        }
+
+        public bool VerifyStudentOtp(string email, string otp, out string message)
+        {
+            var student = _db.Students.FirstOrDefault(x => x.Email != null && x.Email.Equals(email.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (student == null)
+            {
+                message = "Email not found.";
+                return false;
+            }
+
+            if (student.IsEmailVerified)
+            {
+                message = "Email already verified.";
+                return false;
+            }
+
+            if (student.OtpExpiresAt == null || student.OtpExpiresAt < DateTime.UtcNow)
+            {
+                message = "OTP expired. Please request a new one.";
+                return false;
+            }
+
+            if (!string.Equals(student.EmailOtp, otp.Trim(), StringComparison.Ordinal))
+            {
+                message = "Invalid OTP.";
+                return false;
+            }
+
+            student.IsEmailVerified = true;
+            student.Status = ApprovalStatus.Approved;
+            student.EmailOtp = null;
+            student.OtpExpiresAt = null;
             _db.SaveChanges();
 
             message = "Email verified successfully!";

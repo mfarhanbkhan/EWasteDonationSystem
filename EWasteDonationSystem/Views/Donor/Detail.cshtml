@@ -1,11 +1,14 @@
 @* Documented for easier understanding. *@
-@model EWasteDonationSystem.Models.Donor
+@model EWasteDonationSystem.Models.DonorItemDetailVm
 @using System.Linq
 @using EWasteDonationSystem.Models
 @{
     ViewBag.Title = "Donor Detail";
-    var items = Model.DonationItems == null ? new List<DonationItem>() : Model.DonationItems.OrderByDescending(x => x.Id).ToList();
-    var statusClass = Model.Status == ApprovalStatus.Approved ? "ok" : (Model.Status == ApprovalStatus.Rejected ? "bad" : "warn");
+    var donor = Model != null && Model.Donor != null ? Model.Donor : new Donor();
+    var selected = Model != null ? Model.SelectedItem : null;
+    var otherItems = Model != null && Model.OtherItems != null ? Model.OtherItems.OrderByDescending(x => x.Id).ToList() : new List<DonationItem>();
+    var statusClass = donor.Status == ApprovalStatus.Approved ? "ok" : (donor.Status == ApprovalStatus.Rejected ? "bad" : "warn");
+    var itemStatusClass = selected == null ? "warn" : (selected.Status == ApprovalStatus.Approved ? "ok" : (selected.Status == ApprovalStatus.Rejected ? "bad" : "warn"));
 }
 
 <div class="container detail-screen">
@@ -18,7 +21,7 @@
             </div>
         </div>
         <div class="nav">
-            <a class="chip detail-back" href="@Url.Action("Dashboard", "Donor", new { id = Model.Id })">Back to Donor</a>
+            <a class="chip detail-back" href="@Url.Action("Dashboard", "Donor", new { id = donor.Id })">Back to Donor</a>
         </div>
     </div>
 
@@ -27,67 +30,95 @@
             <div class="detail-card-head">
                 <h3 style="font-weight:800;">Profile</h3>
                 <div class="detail-meta-row">
-                    <span>Donor ID: DNR-@Model.Id.ToString("000000")</span>
-                    <span>Created: @Model.CreatedAtUtc.ToLocalTime().ToString("M/d/yyyy, h:mm:ss tt")</span>
-                    <span class="badge @statusClass">@Model.Status</span>
+                    <span>Donor ID: DNR-@donor.Id.ToString("000000")</span>
+                    <span>Created: @donor.CreatedAtUtc.ToLocalTime().ToString("M/d/yyyy, h:mm:ss tt")</span>
+                    @*<span class="badge @statusClass">@donor.Status</span>*@
                 </div>
             </div>
             <div class="detail-card-body detail-profile-grid">
-                <div class="profile-field"><label>Donor Name</label><strong>@Model.FullName</strong></div>
-                <div class="profile-field"><label>Phone</label><strong>@(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)</strong></div>
-                <div class="profile-field"><label>Email</label><strong>@(string.IsNullOrWhiteSpace(Model.Email) ? "—" : Model.Email)</strong></div>
-                <div class="profile-field"><label>City</label><strong>@(string.IsNullOrWhiteSpace(Model.City) ? "—" : Model.City)</strong></div>
-                <div class="profile-field full"><label>Address</label><strong>@(string.IsNullOrWhiteSpace(Model.Address) ? "—" : Model.Address)</strong></div>
+                <div class="profile-field"><label>Donor Name</label><strong>@donor.FullName</strong></div>
+                <div class="profile-field"><label>Phone</label><strong>@(string.IsNullOrWhiteSpace(donor.Phone) ? "—" : donor.Phone)</strong></div>
+                <div class="profile-field"><label>Email</label><strong>@(string.IsNullOrWhiteSpace(donor.Email) ? "—" : donor.Email)</strong></div>
+                <div class="profile-field"><label>City</label><strong>@(string.IsNullOrWhiteSpace(donor.City) ? "—" : donor.City)</strong></div>
+                <div class="profile-field full"><label>Address</label><strong>@(string.IsNullOrWhiteSpace(donor.Address) ? "—" : donor.Address)</strong></div>
             </div>
         </section>
 
         <section class="detail-card request-card">
             <div class="detail-card-head">
-                <h3 style="font-weight:800;">Donation Items</h3>
-                <p>All submitted donation items are shown below.</p>
+                <h3 style="font-weight:800;">Selected Item Detail</h3>
+                <p>Details of the item you selected from the dashboard list.</p>
             </div>
-            <div class="detail-card-body">
-                <table class="table detail-table-lite">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Item Name</th>
-                            <th>Qty</th>
-                            <th>Category</th>
-                            <th>Condition</th>
-                            <th>Item Detail</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (!items.Any())
-                        {
-                            <tr><td colspan="6">No donation item submitted yet.</td></tr>
-                        }
-                        else
-                        {
-                            foreach (var item in items)
+            <div class="detail-card-body" style="padding:10px;">
+                @if (selected == null)
+                {
+                    <div class="chat-empty-note">Selected item not found.</div>
+                }
+                else
+                {
+                    <div class="selected-item-grid" style="display:grid; grid-template-columns: 160px minmax(0,1fr); gap:18px; align-items:start;">
+                        <div>
+                            @if (!string.IsNullOrWhiteSpace(selected.ImagePath))
                             {
-                                <tr>
-                                    <td>
-                                        @if (!string.IsNullOrWhiteSpace(item.ImagePath))
-                                        {
-                                            <img class="detail-thumb" src="@Url.Content(item.ImagePath)" alt="Item" />
-                                        }
-                                        else
-                                        {
-                                            <img class="detail-thumb" src="@Url.Content("~/Content/assets/item-placeholder.svg")" alt="Item" />
-                                        }
-                                    </td>
-                                    <td>@item.ItemName</td>
-                                    <td>@item.Quantity</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.Category) ? "—" : item.Category)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.Condition) ? "—" : item.Condition)</td>
-                                    <td>@(string.IsNullOrWhiteSpace(item.Notes) ? "—" : item.Notes)</td>
-                                </tr>
+                                <img src="@Url.Content(selected.ImagePath)" alt="Item" style="width:160px;height:160px;object-fit:cover;border-radius:16px;border:1px solid rgba(0,0,0,.08);" />
                             }
-                        }
-                    </tbody>
-                </table>
+                            else
+                            {
+                                <img src="@Url.Content("~/Content/assets/item-placeholder.svg")" alt="Item" style="width:160px;height:160px;object-fit:cover;border-radius:16px;border:1px solid rgba(0,0,0,.08);" />
+                            }
+                        </div>
+                        <div>
+                            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                <h2 style="margin:0; font-weight:900; letter-spacing:-.02em;">@selected.ItemName</h2>
+                                <span class="badge @itemStatusClass" style="font-weight:800;">@selected.Status</span>
+                            </div>
+                            <div class="small" style="margin-top:6px; opacity:.8;">
+                                Item ID: ITM-@selected.Id.ToString("000000") • Posted: @selected.CreatedAtUtc.ToLocalTime().ToString("M/d/yyyy, h:mm:ss tt")
+                            </div>
+
+                            <div style="display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; margin-top:16px;">
+                                <div class="profile-field"><label>Quantity</label><strong>@selected.Quantity</strong></div>
+                                <div class="profile-field"><label>Price</label><strong>@selected.Price</strong></div>
+                                <div class="profile-field"><label>Category</label><strong>@(string.IsNullOrWhiteSpace(selected.Category) ? "—" : selected.Category)</strong></div>
+                                <div class="profile-field"><label>Condition</label><strong>@(string.IsNullOrWhiteSpace(selected.Condition) ? "—" : selected.Condition)</strong></div>
+                                <div class="profile-field full" style="grid-column:1 / -1;">
+                                    <label>Item Detail</label>
+                                    <strong style="display:block; white-space:pre-wrap;">@(string.IsNullOrWhiteSpace(selected.Notes) ? "—" : selected.Notes)</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    if (otherItems.Any())
+                    {
+                        <div style="height:14px;"></div>
+                        <div class="small" style="font-weight:800; margin-bottom:10px;">Other Items from this Donor</div>
+                        <div class="table-wrap">
+                            <table class="table detail-table-lite">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Qty</th>
+                                        <th>Status</th>
+                                        <th>Open</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var it in otherItems)
+                                    {
+                                        var sc = it.Status == ApprovalStatus.Approved ? "ok" : (it.Status == ApprovalStatus.Rejected ? "bad" : "warn");
+                                        <tr>
+                                            <td>@it.ItemName</td>
+                                            <td>@it.Quantity</td>
+                                            <td><span class="badge @sc">@it.Status</span></td>
+                                            <td><a class="iconbtn" title="Open item detail" href="@Url.Action("Detail", "Donor", new { id = it.Id })">&#128065;</a></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }
             </div>
         </section>
     </div>
@@ -98,17 +129,17 @@
                 <span class="chip active" style="font-weight:800;">Chat</span>
                 <span class="small">Donation status and chat system</span>
             </div>
-            <a class="chip" href="@Url.Action("Dashboard", "Donor", new { id = Model.Id })">Donor Dashboard</a>
+            <a class="chip" href="@Url.Action("Dashboard", "Donor", new { id = donor.Id })">Donor Dashboard</a>
         </div>
 
         <div class="detail-chat-window">
-            @if (Model.ChatMessages == null || Model.ChatMessages.Count == 0)
+            @if (Model.Chat == null || Model.Chat.Count == 0)
             {
                 <div class="chat-empty-note">No chat messages yet.</div>
             }
             else
             {
-                foreach (var m in Model.ChatMessages.OrderBy(x => x.SentAtUtc))
+                foreach (var m in Model.Chat.OrderBy(x => x.SentAtUtc))
                 {
                     var mine = string.Equals(m.SenderRole, "Donor", System.StringComparison.OrdinalIgnoreCase);
                     <div class="detail-bubble @(mine ? "mine" : "theirs")">
@@ -123,7 +154,7 @@
         {
             @Html.AntiForgeryToken()
             <div class="detail-chat-send">
-                <input type="hidden" name="donorId" value="@Model.Id" />
+                <input type="hidden" name="donorId" value="@donor.Id" />
                 <input class="input" name="message" placeholder="Type message to admin..." />
                 <button class="btn primary" type="submit">Send</button>
             </div>
