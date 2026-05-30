@@ -46,15 +46,36 @@
                 <h3>Application Details</h3>
                 <p>Items needed + reason</p>
             </div>
-            <div class="detail-card-body detail-application-stack">
-                <div class="profile-field full">
-                    <label>Items Needed</label>
-                    <strong>@(latestApp != null && !string.IsNullOrWhiteSpace(latestApp.ItemsNeeded) ? latestApp.ItemsNeeded : "—")</strong>
-                </div>
-                <div class="profile-field full">
-                    <label>Reason</label>
-                    <strong>@(latestApp != null && !string.IsNullOrWhiteSpace(latestApp.Reason) ? latestApp.Reason : "—")</strong>
-                </div>
+            <div class="detail-card-body" style="padding:10px;">
+                @if (latestApp == null)
+                {
+                    <div class="chat-empty-note">No application found.</div>
+                }
+                else
+                {
+                    <div class="selected-item-grid" style="display:grid; grid-template-columns: 160px minmax(0,1fr); gap:18px; align-items:start;">
+                        <div>
+                            @if (!string.IsNullOrWhiteSpace(latestApp.ImagePath))
+                            {
+                                <img src="@Url.Content(latestApp.ImagePath)" alt="Application" style="width:160px;height:160px;object-fit:cover;border-radius:16px;border:1px solid rgba(0,0,0,.08);" />
+                            }
+                            else
+                            {
+                                <img src="@Url.Content("~/Content/assets/item-placeholder.svg")" alt="Application" style="width:160px;height:160px;object-fit:cover;border-radius:16px;border:1px solid rgba(0,0,0,.08);" />
+                            }
+                        </div>
+                        <div class="detail-application-stack">
+                            <div class="profile-field full">
+                                <label>Items Needed</label>
+                                <strong>@(string.IsNullOrWhiteSpace(latestApp.ItemsNeeded) ? "—" : latestApp.ItemsNeeded)</strong>
+                            </div>
+                            <div class="profile-field full">
+                                <label>Reason</label>
+                                <strong>@(string.IsNullOrWhiteSpace(latestApp.Reason) ? "—" : latestApp.Reason)</strong>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
         </section>
     </div>

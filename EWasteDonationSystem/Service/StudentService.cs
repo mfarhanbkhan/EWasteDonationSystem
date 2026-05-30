@@ -118,8 +118,16 @@ namespace EWasteDonationSystem.Service
                 itemsNeeded = itemsNeededRaw;
             }
 
+            var donation = _db.DonationItems.FirstOrDefault(x => x.ItemName == vm.Application.ItemsNeeded);
+            if (donation is null)
+            {
+                message = "Image not found";
+                return false;
+            }
+
             _db.StudentApplications.Add(new StudentApplication
             {
+                ImagePath = donation.ImagePath,
                 StudentId = studentId,
                 ItemsNeeded = itemsNeeded,
                 Reason = reason,

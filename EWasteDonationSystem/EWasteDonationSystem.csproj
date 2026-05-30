@@ -110,6 +110,10 @@
     <Compile Include="Migrations\202605300145310_UpdatePhoneField.Designer.cs">
       <DependentUpon>202605300145310_UpdatePhoneField.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605300211251_NewColumnImagePath.cs" />
+    <Compile Include="Migrations\202605300211251_NewColumnImagePath.Designer.cs">
+      <DependentUpon>202605300211251_NewColumnImagePath.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApprovalStatus.cs" />
     <Compile Include="Models\AppDbContext.cs" />
@@ -166,6 +170,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202605300145310_UpdatePhoneField.resx">
       <DependentUpon>202605300145310_UpdatePhoneField.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605300211251_NewColumnImagePath.resx">
+      <DependentUpon>202605300211251_NewColumnImagePath.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -26,6 +26,9 @@ namespace EWasteDonationSystem.Models
         public ApprovalStatus Status { get; set; } = ApprovalStatus.Pending;
 
         public DateTime CreatedAtUtc { get; set; }
+        
+        [StringLength(260)]
+        public string ImagePath { get; set; } = string.Empty;
 
         // Navigation
         public virtual Student Student { get; set; }
