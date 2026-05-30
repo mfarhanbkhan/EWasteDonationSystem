@@ -20,8 +20,15 @@ namespace EWasteDonationSystem.Service
             return new HomeStatsVm
             {
                 DonorCount = _db.Donors.Count(),
+                ItemCount = _db.DonationItems.Count(),
+                ApprovedDonorCount = _db.DonationItems.Count(x => x.Status == ApprovalStatus.Approved),
+                PendingItems = _db.DonationItems.Count(x => x.Status == ApprovalStatus.Pending),
+                RejectedDonationItems = _db.DonationItems.Count(x => x.Status == ApprovalStatus.Rejected),
+
                 StudentCount = _db.Students.Count(),
-                ItemCount = _db.DonationItems.Count()
+                ApprovedStudentApplications = _db.StudentApplications.Count(x => x.Status == ApprovalStatus.Approved),
+                PendingStudentApplications = _db.StudentApplications.Count(x => x.Status == ApprovalStatus.Pending),
+                RejectedStudentApplications = _db.StudentApplications.Count(x => x.Status == ApprovalStatus.Rejected),
             };
         }
 
@@ -31,7 +38,7 @@ namespace EWasteDonationSystem.Service
             {
                 DonorCount = _db.Donors.Count(),
                 StudentCount = _db.Students.Count(),
-                PendingItems = _db.DonationItems.Count()
+                PendingItems = _db.DonationItems.Count(x => x.Status == ApprovalStatus.Pending)
             };
         }
     }
@@ -45,5 +52,11 @@ namespace EWasteDonationSystem.Service
         public int StudentCount { get; set; }
         public int ItemCount { get; set; }
         public int PendingItems { get; set; }
+        public int UserCount { get; set; }
+        public int ApprovedDonorCount { get; set; }
+        public int RejectedDonationItems { get; set; }
+        public int PendingStudentApplications { get; set; }
+        public int ApprovedStudentApplications { get; set; }
+        public int RejectedStudentApplications { get; set; }
     }
 }

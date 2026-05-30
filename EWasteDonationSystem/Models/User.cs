@@ -20,6 +20,7 @@ namespace EWasteDonationSystem.Models
 
         [Required, StringLength(200)]
         public string Password { get; set; }
+        public string RoleType { get; set; } = "Admin";
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAtUtc { get; set; }
 

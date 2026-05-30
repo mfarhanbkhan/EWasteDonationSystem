@@ -26,7 +26,7 @@ namespace EWasteDonationSystem.Models
         public string FullName { get; set; }
 
         [StringLength(30)]
-        public string Phone { get; set; }
+        public string UserName { get; set; }
 
         [EmailAddress, StringLength(120)]
         public string Email { get; set; }

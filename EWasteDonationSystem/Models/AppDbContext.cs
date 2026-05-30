@@ -9,12 +9,6 @@ namespace EWasteDonationSystem.Models
     /// </summary>
     public class AppDbContext : DbContext
     {
-        // Connection string name (defined in Web.config)
-        static AppDbContext()
-        {
-            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<AppDbContext>());
-        }
-
         public AppDbContext() : base("DefaultConnection")
         {
         }

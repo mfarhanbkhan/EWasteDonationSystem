@@ -81,10 +81,10 @@ namespace EWasteDonationSystem.Service
             }
 
             //existing.FullName = (vm.Student.FullName ?? string.Empty).Trim();
-            //existing.Phone = (vm.Student.Phone ?? string.Empty).Trim();
-            //existing.Institute = (vm.Student.Institute ?? string.Empty).Trim();
-            //existing.City = (vm.Student.City ?? string.Empty).Trim();
-            //existing.Address = (vm.Student.Address ?? string.Empty).Trim();
+            existing.Phone = (vm.Student.Phone ?? string.Empty).Trim();
+            existing.Institute = (vm.Student.Institute ?? string.Empty).Trim();
+            existing.City = (vm.Student.City ?? string.Empty).Trim();
+            existing.Address = (vm.Student.Address ?? string.Empty).Trim();
             session["StudentName"] = existing.FullName;
 
             var itemsNeededRaw = vm.Application != null ? (vm.Application.ItemsNeeded ?? string.Empty).Trim() : string.Empty;

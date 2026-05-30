@@ -1,3 +1,4 @@
+using System;
 using System.Web.Mvc;
 using EWasteDonationSystem.Models;
 using EWasteDonationSystem.Service;
@@ -34,10 +35,26 @@ namespace EWasteDonationSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult AdminForgotPassword(string email, string newPassword, string confirmPassword)
+        public JsonResult SendAdminPasswordResetOtp(string email)
+        {
+            try
+            {
+                string message;
+                var success = _accountService.TrySendAdminPasswordResetOtp(email, out message);
+                return Json(new { success, message }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AdminForgotPassword(string email, string otp, string newPassword, string confirmPassword)
         {
             string message;
-            if (_accountService.TryRecoverAdminPassword(Session, email, newPassword, confirmPassword, out message))
+            if (_accountService.TryRecoverAdminPassword(email, otp, newPassword, confirmPassword, out message))
             {
                 TempData["Success"] = message;
             }
@@ -83,9 +100,16 @@ namespace EWasteDonationSystem.Controllers
         [ValidateAntiForgeryToken]
         public JsonResult SendDonorPasswordResetOtp(string email)
         {
-            string message;
-            var success = _accountService.TrySendDonorPasswordResetOtp(email, out message);
-            return Json(new { success, message });
+            try
+            {
+                string message;
+                var success = _accountService.TrySendDonorPasswordResetOtp(email, out message);
+                return Json(new { success, message }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         [HttpPost]
@@ -154,9 +178,16 @@ namespace EWasteDonationSystem.Controllers
         [ValidateAntiForgeryToken]
         public JsonResult SendStudentPasswordResetOtp(string email)
         {
-            string message;
-            var success = _accountService.TrySendStudentPasswordResetOtp(email, out message);
-            return Json(new { success, message });
+            try
+            {
+                string message;
+                var success = _accountService.TrySendStudentPasswordResetOtp(email, out message);
+                return Json(new { success, message }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         [HttpPost]

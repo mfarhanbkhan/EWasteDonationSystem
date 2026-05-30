@@ -34,10 +34,17 @@ namespace EWasteDonationSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult SetDonorStatus(int id, ApprovalStatus status)
+        public ActionResult SetDonorStatus(int id, ApprovalStatus status, decimal? salePrice = null)
         {
             if (!_adminService.IsAdminLoggedIn(Session)) return RedirectToAdminLogin();
-            if (!_adminService.SetDonorStatus(id, status)) return HttpNotFound();
+
+            if (status == ApprovalStatus.Approved && (!salePrice.HasValue || salePrice.Value < 1))
+            {
+                TempData["Error"] = "Please enter a valid sale price before approving.";
+                return RedirectToAction("Dashboard");
+            }
+
+            if (!_adminService.SetDonorStatus(id, status, salePrice)) return HttpNotFound();
             TempData["Success"] = "Donor status updated successfully.";
             return RedirectToAction("Dashboard");
         }

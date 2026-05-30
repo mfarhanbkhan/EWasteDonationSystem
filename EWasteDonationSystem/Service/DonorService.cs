@@ -118,7 +118,7 @@ namespace EWasteDonationSystem.Service
             }
 
             existing.FullName = donor.FullName;
-            existing.Phone = donor.Phone;
+            existing.UserName = donor.UserName;
             existing.Email = donor.Email;
             existing.City = donor.City;
             existing.Address = donor.Address;
@@ -149,8 +149,8 @@ namespace EWasteDonationSystem.Service
             //    donor.FullName = string.IsNullOrWhiteSpace(vm.Donor.FullName) ? donor.FullName : vm.Donor.FullName.Trim();
             //    donor.Phone = vm.Donor.Phone;
             //    donor.Email = vm.Donor.Email;
-            //    donor.City = vm.Donor.City;
-            //    donor.Address = vm.Donor.Address;
+            donor.City = vm.Donor.City;
+            donor.Address = vm.Donor.Address;
             //    session["DonorName"] = donor.FullName;
             //}
             session["DonorName"] = donor.FullName;

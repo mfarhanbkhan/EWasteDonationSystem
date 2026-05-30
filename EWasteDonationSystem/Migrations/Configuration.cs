@@ -14,10 +14,18 @@
 
         protected override void Seed(EWasteDonationSystem.Models.AppDbContext context)
         {
-            //  This method will be called after migrating to the latest version.
-
-            //  You can use the DbSet<T>.AddOrUpdate() helper extension method
-            //  to avoid creating duplicate seed data.
+            context.Users.AddOrUpdate(
+                x => x.Email,
+                new EWasteDonationSystem.Models.User
+                {
+                    Email = "admin@gmail.com",
+                    FullName = "Administrator",
+                    Password = "Admin@123",
+                    RoleType = "Admin",
+                    IsActive = true,
+                    IsEmailVerified = true,
+                    CreatedAtUtc = DateTime.UtcNow
+                });
         }
     }
 }

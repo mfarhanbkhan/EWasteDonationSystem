@@ -37,7 +37,7 @@
             </div>
             <div class="detail-card-body detail-profile-grid">
                 <div class="profile-field"><label>Donor Name</label><strong>@donor.FullName</strong></div>
-                <div class="profile-field"><label>Phone</label><strong>@(string.IsNullOrWhiteSpace(donor.Phone) ? "—" : donor.Phone)</strong></div>
+                <div class="profile-field"><label>Phone</label><strong>@(string.IsNullOrWhiteSpace(donor.UserName) ? "—" : donor.UserName)</strong></div>
                 <div class="profile-field"><label>Email</label><strong>@(string.IsNullOrWhiteSpace(donor.Email) ? "—" : donor.Email)</strong></div>
                 <div class="profile-field"><label>City</label><strong>@(string.IsNullOrWhiteSpace(donor.City) ? "—" : donor.City)</strong></div>
                 <div class="profile-field full"><label>Address</label><strong>@(string.IsNullOrWhiteSpace(donor.Address) ? "—" : donor.Address)</strong></div>
@@ -78,7 +78,8 @@
 
                             <div style="display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; margin-top:16px;">
                                 <div class="profile-field"><label>Quantity</label><strong>@selected.Quantity</strong></div>
-                                <div class="profile-field"><label>Price</label><strong>@selected.Price</strong></div>
+                                <div class="profile-field"><label>Cost Price</label><strong>@selected.Price</strong></div>
+                                <div class="profile-field"><label>Sale Price</label><strong>@selected.SalePrice</strong></div>
                                 <div class="profile-field"><label>Category</label><strong>@(string.IsNullOrWhiteSpace(selected.Category) ? "—" : selected.Category)</strong></div>
                                 <div class="profile-field"><label>Condition</label><strong>@(string.IsNullOrWhiteSpace(selected.Condition) ? "—" : selected.Condition)</strong></div>
                                 <div class="profile-field full" style="grid-column:1 / -1;">

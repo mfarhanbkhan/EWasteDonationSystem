@@ -71,12 +71,13 @@
                             else
                             {
                                 <select class="input" name="Application.ItemsNeeded" required data-label="Item Needed">
-                                    <option value="">Select an approved item</option>
+                                    <option value="">Select item</option>
                                     @foreach (var item in approvedItems)
                                     {
                                         var category = string.IsNullOrWhiteSpace(item.Category) ? "—" : item.Category;
                                         var condition = string.IsNullOrWhiteSpace(item.Condition) ? "—" : item.Condition;
-                                        <option value="@item.ItemName">@item.ItemName (@category, @condition)</option>
+                                        var salePrice = "Price: " + item.SalePrice;
+                                        <option value="@item.ItemName">@item.ItemName (@category, @condition), @salePrice</option>
                                     }
                                 </select>
                             }

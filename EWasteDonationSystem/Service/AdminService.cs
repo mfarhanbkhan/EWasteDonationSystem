@@ -1,13 +1,14 @@
 // Project documentation note: This file contains commented code for easier understanding.
+using EWasteDonationSystem.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Web.Configuration;
 using System.Web;
-using EWasteDonationSystem.Models;
+using System.Web.Configuration;
+using static System.Net.WebRequestMethods;
 
 namespace EWasteDonationSystem.Service
 {
@@ -17,10 +18,12 @@ namespace EWasteDonationSystem.Service
     public class AdminService
     {
         private readonly AppDbContext _db;
+        private readonly EmailService _emailService;
 
         public AdminService(AppDbContext db)
         {
             _db = db;
+            _emailService = new EmailService();
         }
 
         public bool IsAdminLoggedIn(HttpSessionStateBase session)
@@ -93,16 +96,37 @@ namespace EWasteDonationSystem.Service
             };
         }
 
-        public bool SetDonorStatus(int itemId, ApprovalStatus status)
+        public bool SetDonorStatus(int itemId, ApprovalStatus status, decimal? salePrice = null)
         {
             var record = _db.DonationItems.Find(itemId);
             if (record == null) return false;
+
+            if (status == ApprovalStatus.Approved)
+            {
+                if (!salePrice.HasValue || salePrice.Value < 1)
+                    return false;
+
+                record.SalePrice = salePrice.Value;
+            }
+
             record.Status = status;
             _db.SaveChanges();
-            //SendEmailIfConfigured(
-            //    donor.Email,
-            //    "E-Waste Donor Status Update",
-            //    "Dear " + (string.IsNullOrWhiteSpace(donor.FullName) ? "Donor" : donor.FullName) + ",\n\nYour donor request status is now: " + status + ".\n\nThanks,\nE-Waste Team");
+
+            string subject = $"Update on Your Donation (Item #{itemId})";
+            string body = $@"
+                <p>Dear {record.Donor.FullName},</p>
+                <p>We wanted to inform you that the status of your donation (Item ID: {itemId}) has been updated to <strong>{status}</strong>.</p>
+                <p>Thank you for your generosity and support!</p>
+                <p>Best regards,<br/>Farhan Baloch</p>
+            ";
+
+            bool isSent = _emailService.SendEmail(
+                toAddress: record.Donor.Email,
+                subject: subject,
+                body: body,
+                isHtml: true
+            );
+
             return true;
         }
 
@@ -113,10 +137,21 @@ namespace EWasteDonationSystem.Service
             record.Status = status;
             _db.SaveChanges();
 
-            //SendEmailIfConfigured(
-            //    student.Email,
-            //    "E-Waste Student Status Update",
-            //    "Dear " + (string.IsNullOrWhiteSpace(student.FullName) ? "Student" : student.FullName) + ",\n\nYour student request status is now: " + status + ".\n\nThanks,\nE-Waste Team");
+            string subject = $"Update on Your Request (Item #{itemId})";
+            string body = $@"
+                <p>Dear {record.Student.FullName},</p>
+                <p>We wanted to inform you that the status of your request (Item ID: {itemId}) has been updated to <strong>{status}</strong>.</p>
+                <p>Thank you for your generosity and support!</p>
+                <p>Best regards,<br/>Farhan Baloch</p>
+            ";
+
+            bool isSent = _emailService.SendEmail(
+                toAddress: record.Student.Email,
+                subject: subject,
+                body: body,
+                isHtml: true
+            );
+
             return true;
         }
 

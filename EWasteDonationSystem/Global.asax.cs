@@ -1,8 +1,10 @@
 // Project documentation note: This file contains commented code for easier understanding.
 using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using EWasteDonationSystem.Migrations;
 using EWasteDonationSystem.Models;
 
 namespace EWasteDonationSystem
@@ -11,8 +13,8 @@ namespace EWasteDonationSystem
     {
         protected void Application_Start()
         {
-            // Create database automatically if it doesn't exist.
-            Database.SetInitializer(new CreateDatabaseIfNotExists<AppDbContext>());
+            // Apply EF migrations on startup (creates/updates Users table and seed data).
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<AppDbContext, Configuration>());
 
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

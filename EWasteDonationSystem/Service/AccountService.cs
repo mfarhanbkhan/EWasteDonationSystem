@@ -36,51 +36,102 @@ namespace EWasteDonationSystem.Service
         }
 
         /// <summary>
-        /// Validate admin credentials and update session state.
+        /// Validate admin credentials from the Users table and update session state.
         /// </summary>
         public bool TryAdminLogin(HttpSessionStateBase session, string email, string password, out string errorMessage)
         {
             var trimmedEmail = (email ?? string.Empty).Trim();
             var trimmedPassword = (password ?? string.Empty).Trim();
 
-            var isValidAdminIdentity = _adminEmails.Any(x => string.Equals(trimmedEmail, x, StringComparison.OrdinalIgnoreCase))
-                || _adminUserNames.Any(x => string.Equals(trimmedEmail, x, StringComparison.OrdinalIgnoreCase));
-
-            var recoveredAdminPassword = (Convert.ToString(session["RecoveredAdminPassword"]) ?? string.Empty).Trim();
-            var isValidAdminPassword = (!string.IsNullOrWhiteSpace(recoveredAdminPassword) && string.Equals(trimmedPassword, recoveredAdminPassword, StringComparison.Ordinal))
-                || _adminPasswords.Any(x => string.Equals(trimmedPassword, x.Trim(), StringComparison.OrdinalIgnoreCase));
-
-            if (!isValidAdminIdentity || !isValidAdminPassword)
+            if (string.IsNullOrWhiteSpace(trimmedEmail) || string.IsNullOrWhiteSpace(trimmedPassword))
             {
                 errorMessage = "Invalid email and password";
                 return false;
             }
 
+            var user = _db.Users.FirstOrDefault(x => x.Email != null && x.Email.Equals(trimmedEmail, StringComparison.OrdinalIgnoreCase));
+            if (user == null)
+            {
+                errorMessage = "Invalid email and password";
+                return false;
+            }
+
+            if (!user.IsEmailVerified)
+            {
+                errorMessage = "Your account is not verified. Please contact support.";
+                return false;
+            }
+
+            string upgradedPassword;
+            if (!TryVerifyAndUpgradePassword(user.Password, trimmedPassword, out upgradedPassword))
+            {
+                errorMessage = "Invalid email and password";
+                return false;
+            }
+
+            if (!string.IsNullOrEmpty(upgradedPassword))
+            {
+                user.Password = upgradedPassword;
+                _db.SaveChanges();
+            }
+
             session["AdminLoggedIn"] = true;
-            session["AdminName"] = "Administrator";
-            session["AdminEmail"] = trimmedEmail;
+            session["AdminName"] = string.IsNullOrWhiteSpace(user.FullName) ? "Administrator" : user.FullName;
+            session["AdminEmail"] = user.Email;
+            session["AdminUserId"] = user.Id;
             errorMessage = null;
             return true;
         }
 
         /// <summary>
-        /// Change the admin password stored in session-based recovery flow.
+        /// Generate and email an OTP for admin password reset.
         /// </summary>
-        public bool TryRecoverAdminPassword(HttpSessionStateBase session, string email, string newPassword, string confirmPassword, out string message)
+        public bool TrySendAdminPasswordResetOtp(string email, out string message)
         {
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            if (string.IsNullOrWhiteSpace(email))
             {
-                message = "Please fill all admin forgotten password fields.";
+                message = "Please enter your admin email.";
                 return false;
             }
 
-            var normalizedAdminEmail = email.Trim();
-            var adminExists = _adminEmails.Any(x => string.Equals(normalizedAdminEmail, x, StringComparison.OrdinalIgnoreCase))
-                || _adminUserNames.Any(x => string.Equals(normalizedAdminEmail, x, StringComparison.OrdinalIgnoreCase));
-
-            if (!adminExists)
+            var normalizedEmail = email.Trim();
+            var user = _db.Users.FirstOrDefault(x => x.Email != null && x.Email.Equals(normalizedEmail, StringComparison.OrdinalIgnoreCase));
+            if (user == null)
             {
                 message = "Admin email not found.";
+                return false;
+            }
+
+            if (!user.IsActive)
+            {
+                message = "Your admin account is inactive. Please contact support.";
+                return false;
+            }
+
+            var otp = GenerateOtp();
+            user.EmailOtp = otp;
+            user.OtpExpiresAt = DateTime.UtcNow.AddMinutes(10);
+            _db.SaveChanges();
+
+            _emailService.SendEmail(
+                toAddress: normalizedEmail,
+                subject: "Your OTP for Admin Password Reset",
+                body: $"Your password reset OTP is: <b>{otp}</b>. It is valid for 10 minutes.",
+                isHtml: true
+            );
+
+            message = "OTP sent to your email.";
+            return true;
+        }
+
+        /// <summary>
+        /// Update admin password by email after OTP verification.
+        /// </summary>
+        public bool TryRecoverAdminPassword(string email, string otp, string newPassword, string confirmPassword, out string message)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otp) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                message = "Please fill all admin forgotten password fields.";
                 return false;
             }
 
@@ -96,8 +147,36 @@ namespace EWasteDonationSystem.Service
                 return false;
             }
 
-            session["RecoveredAdminPassword"] = newPassword.Trim();
-            session["RecoveredAdminEmail"] = _primaryAdminEmail;
+            var normalizedAdminEmail = email.Trim();
+            var user = _db.Users.FirstOrDefault(x => x.Email != null && x.Email.Equals(normalizedAdminEmail, StringComparison.OrdinalIgnoreCase));
+            if (user == null)
+            {
+                message = "Admin email not found.";
+                return false;
+            }
+
+            if (!user.IsActive)
+            {
+                message = "Your admin account is inactive. Please contact support.";
+                return false;
+            }
+
+            if (user.OtpExpiresAt == null || user.OtpExpiresAt < DateTime.UtcNow)
+            {
+                message = "OTP expired. Please request a new one.";
+                return false;
+            }
+
+            if (!string.Equals(user.EmailOtp, otp.Trim(), StringComparison.Ordinal))
+            {
+                message = "Invalid OTP.";
+                return false;
+            }
+
+            user.Password = HashPassword(newPassword.Trim());
+            user.EmailOtp = null;
+            user.OtpExpiresAt = null;
+            _db.SaveChanges();
             message = "Admin password recovered successfully. Please login with your new password.";
             return true;
         }
@@ -137,7 +216,7 @@ namespace EWasteDonationSystem.Service
 
             var donor = new Donor
             {
-                Phone = userName.Trim(),
+                UserName = userName.Trim(),
                 FullName = name.Trim(),
                 Email = normalizedEmail,
                 Password = HashPassword(password.Trim()),
@@ -492,7 +571,7 @@ namespace EWasteDonationSystem.Service
 
         private bool EmailExists(string email)
         {
-            return _adminEmails.Any(x => string.Equals(email, x, StringComparison.OrdinalIgnoreCase))
+            return _db.Users.Any(x => x.Email != null && x.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
                 || _db.Donors.Any(x => x.Email != null && x.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
                 || _db.Students.Any(x => x.Email != null && x.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
         }

@@ -159,6 +159,7 @@
                             <th>Donor ID</th>
                             <th>Donor Name</th>
                             <th>Item Name</th>
+                            <th>Price</th>
                             <th>Image</th>
                             <th>Status</th>
                             <th>Detail</th>
@@ -178,6 +179,7 @@
                                     <td>DNR-@donorProfile.Id.ToString("000000")</td>
                                     <td>@donorName</td>
                                     <td>@item.ItemName</td>
+                                    <td>@item.Price</td>
                                     <td>
                                         @if (!string.IsNullOrWhiteSpace(item.ImagePath))
                                         {

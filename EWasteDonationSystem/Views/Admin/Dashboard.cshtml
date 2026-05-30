@@ -75,6 +75,7 @@
                         <tr>
                             <th>Donor</th>
                             <th>Item</th>
+                            <th>Price</th>
                             <th>Status</th>
                             <th>Actions</th>
                             <th>Detail</th>
@@ -91,41 +92,45 @@
                             {
                                 //var item = donorItemsLookup.ContainsKey(d.Id) ? donorItemsLookup[d.Id] : null;
                                 var badgeClass = d.Status == ApprovalStatus.Approved ? "badge ok" : d.Status == ApprovalStatus.Rejected ? "badge bad" : "badge warn";
-                                <tr>
-                                    <td>
-                                        <strong>@d.Donor.FullName</strong><br />
-                                        <span class="small">DNR-@d.Id.ToString("000000")</span><br />
-                                        <span class="small">@(string.IsNullOrWhiteSpace(d.Donor.City) ? d.Donor.Email : d.Donor.City)</span>
-                                    </td>
-                                    <td>@(d != null ? d.ItemName + " (x" + d.Quantity + ")" : "—")</td>
-                                    <td><span class="@badgeClass">@d.Status</span></td>
-                                    <td>
-                                        <div class="btnrow admin-action-stack">
-                                            @using (Html.BeginForm("SetDonorStatus", "Admin", FormMethod.Post))
-                                            {
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@d.Id" />
-                                                <input type="hidden" name="status" value="Approved" />
-                                                <button class="btn ok" type="submit">Approve</button>
-                                            }
-                                            @using (Html.BeginForm("SetDonorStatus", "Admin", FormMethod.Post))
-                                            {
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@d.Id" />
-                                                <input type="hidden" name="status" value="Rejected" />
-                                                <button class="btn warn" type="submit">Reject</button>
-                                            }
-                                            @*@using (Html.BeginForm("SetDonorStatus", "Admin", FormMethod.Post))
-                                            {
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@d.Id" />
-                                                <input type="hidden" name="status" value="Pending" />
-                                                <button class="btn ghost" type="submit">Pending</button>
-                                            }*@
-                                        </div>
-                                    </td>
-                                    <td><a class="iconbtn detail-eye-btn" title="Open item detail" href="@Url.Action("DonorDetail", "Admin", new { id = d.Id })">&#128065;</a></td>
-                                </tr>
+                    <tr>
+                        <td>
+                            <strong>@d.Donor.FullName</strong><br />
+                            <span class="small">DNR-@d.Id.ToString("000000")</span><br />
+                            <span class="small">@(string.IsNullOrWhiteSpace(d.Donor.City) ? d.Donor.Email : d.Donor.City)</span>
+                        </td>
+                        <td>@(d != null ? d.ItemName + " (x" + d.Quantity + ")" : "—")</td>
+                        <td><span>@d.Price</span></td>
+
+                        <td><span class="@badgeClass">@d.Status</span></td>
+                        <td>
+                            <div class="btnrow admin-action-stack">
+                                <button type="button"
+                                        class="btn ok"
+                                        onclick="openDonorApproveModal(this)"
+                                        data-item-id="@d.Id"
+                                        data-item-name="@(d.ItemName ?? "")"
+                                        data-cost-price="@d.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-sale-price="@(d.SalePrice > 0 ? d.SalePrice.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")">
+                                    Approve
+                                </button>
+                                @using (Html.BeginForm("SetDonorStatus", "Admin", FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@d.Id" />
+                                    <input type="hidden" name="status" value="Rejected" />
+                                    <button class="btn warn" type="submit">Reject</button>
+                                }
+                                @*@using (Html.BeginForm("SetDonorStatus", "Admin", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@d.Id" />
+                    <input type="hidden" name="status" value="Pending" />
+                    <button class="btn ghost" type="submit">Pending</button>
+                }*@
+                            </div>
+                        </td>
+                        <td><a class="iconbtn detail-eye-btn" title="Open item detail" href="@Url.Action("DonorDetail", "Admin", new { id = d.Id })">&#128065;</a></td>
+                    </tr>
                             }
                         }
                     </tbody>
@@ -399,7 +404,71 @@
         </div>
     </div>
 
+<div id="donorApproveModal" class="otp-modal">
+    <div class="otp-backdrop" onclick="closeDonorApproveModal()"></div>
+    <div class="otp-content">
+        <button type="button" class="otp-close" onclick="closeDonorApproveModal()">&times;</button>
+        <h3>Approve Donation Item</h3>
+        <p class="small">Item: <strong id="approveModalItemName"></strong></p>
+        @using (Html.BeginForm("SetDonorStatus", "Admin", FormMethod.Post, new { id = "donorApproveForm" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="approveModalItemId" value="" />
+            <input type="hidden" name="status" value="Approved" />
+            <div class="form admin-single-column-form" style="margin-top:14px;">
+                <div class="field full">
+                    <label for="approveModalCostPrice">Cost Price</label>
+                    <input type="text" id="approveModalCostPrice" class="input" disabled />
+                </div>
+                <div class="field full">
+                    <label for="approveModalSalePrice">Sale Price</label>
+                    <input type="number" class="input" id="approveModalSalePrice" name="salePrice" step="0.01" min="1" required placeholder="Enter sale price" />
+                </div>
+            </div>
+            <div class="btnrow" style="margin-top:18px;">
+                <button class="btn ok" type="submit">Approve</button>
+                <button class="btn ghost" type="button" onclick="closeDonorApproveModal()">Close</button>
+            </div>
+        }
+    </div>
+</div>
+
 <script>
+    function openDonorApproveModal(button) {
+        var modal = document.getElementById('donorApproveModal');
+        if (!modal || !button) return;
+
+        var itemId = document.getElementById('approveModalItemId');
+        var itemName = document.getElementById('approveModalItemName');
+        var costPrice = document.getElementById('approveModalCostPrice');
+        var salePrice = document.getElementById('approveModalSalePrice');
+
+        if (itemId) itemId.value = button.getAttribute('data-item-id') || '';
+        if (itemName) itemName.textContent = button.getAttribute('data-item-name') || '';
+        if (costPrice) costPrice.value = button.getAttribute('data-cost-price') || '';
+        if (salePrice) {
+            salePrice.value = button.getAttribute('data-sale-price') || '';
+            salePrice.focus();
+        }
+
+        modal.classList.add('active');
+    }
+
+    function closeDonorApproveModal() {
+        var modal = document.getElementById('donorApproveModal');
+        if (!modal) return;
+        modal.classList.remove('active');
+
+        var approveForm = document.getElementById('donorApproveForm');
+        var costPrice = document.getElementById('approveModalCostPrice');
+        if (approveForm) approveForm.reset();
+        if (costPrice) costPrice.value = '';
+    }
+
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Escape') closeDonorApproveModal();
+    });
+
 (function(){
     function wireAjaxForms(){
         var forms = document.querySelectorAll('form[data-ajax-form="true"]');
@@ -439,6 +508,56 @@
 </script>
 
 <style>
+    .otp-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .otp-modal.active {
+        display: flex;
+    }
+
+    .otp-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+    }
+
+    .otp-content {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 420px;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 24px 70px rgba(15, 23, 42, 0.2);
+        padding: 28px 26px;
+    }
+
+    .otp-close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        border: none;
+        background: transparent;
+        font-size: 24px;
+        cursor: pointer;
+        color: #334155;
+    }
+
+    .otp-content h3 {
+        margin-top: 0;
+    }
+
+    .otp-content .small {
+        color: #64748b;
+    }
+
     .admin-chat-wrap .chat-delete-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
     .admin-chat-wrap .inline-delete-form{display:inline-block; margin:0;}
     .admin-chat-wrap .chat-delete-btn{background:none; border:none; padding:0; font-size:12px; cursor:pointer; text-decoration:underline; opacity:.85;}

@@ -18,6 +18,15 @@ namespace EWasteDonationSystem.Controllers
                 ViewBag.DonorCount = stats.DonorCount;
                 ViewBag.StudentCount = stats.StudentCount;
                 ViewBag.ItemCount = stats.ItemCount;
+
+                ViewBag.UserCount = stats.UserCount;
+                ViewBag.PendingItems = stats.PendingItems;
+                ViewBag.ApprovedDonorCount = stats.ApprovedDonorCount;
+                ViewBag.RejectedDonationItems = stats.RejectedDonationItems;
+                ViewBag.PendingStudentApplications = stats.PendingStudentApplications;
+                ViewBag.ApprovedStudentApplications = stats.ApprovedStudentApplications;
+                ViewBag.RejectedStudentApplications = stats.RejectedStudentApplications;
+
             }
 
             return View();
@@ -32,6 +41,11 @@ namespace EWasteDonationSystem.Controllers
                 ViewBag.DonorCount = stats.DonorCount;
                 ViewBag.StudentCount = stats.StudentCount;
                 ViewBag.PendingItems = stats.PendingItems;
+
+                ViewBag.UserCount = stats.UserCount;
+                ViewBag.ApprovedDonorCount = stats.ApprovedDonorCount;
+                ViewBag.PendingStudentApplications = stats.PendingStudentApplications;
+                ViewBag.ApprovedStudentApplications = stats.ApprovedStudentApplications;
             }
 
             ViewBag.ShowOtpDialog = showOtp;

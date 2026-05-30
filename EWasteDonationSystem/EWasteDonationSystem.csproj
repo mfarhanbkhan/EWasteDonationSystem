@@ -98,6 +98,18 @@
     <Compile Include="Migrations\202605261818589_Initial.Designer.cs">
       <DependentUpon>202605261818589_Initial.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605281207463_UserTable.cs" />
+    <Compile Include="Migrations\202605281207463_UserTable.Designer.cs">
+      <DependentUpon>202605281207463_UserTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202605292320147_SalePriceField.cs" />
+    <Compile Include="Migrations\202605292320147_SalePriceField.Designer.cs">
+      <DependentUpon>202605292320147_SalePriceField.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202605300145310_UpdatePhoneField.cs" />
+    <Compile Include="Migrations\202605300145310_UpdatePhoneField.Designer.cs">
+      <DependentUpon>202605300145310_UpdatePhoneField.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ApprovalStatus.cs" />
     <Compile Include="Models\AppDbContext.cs" />
@@ -145,6 +157,15 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202605261818589_Initial.resx">
       <DependentUpon>202605261818589_Initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605281207463_UserTable.resx">
+      <DependentUpon>202605281207463_UserTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605292320147_SalePriceField.resx">
+      <DependentUpon>202605292320147_SalePriceField.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605300145310_UpdatePhoneField.resx">
+      <DependentUpon>202605300145310_UpdatePhoneField.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

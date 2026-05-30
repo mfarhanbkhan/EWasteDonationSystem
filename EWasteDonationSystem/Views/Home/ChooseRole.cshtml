@@ -261,18 +261,29 @@
                 </div>
                 <div id="adminForgotPanel" class="forgot-panel">
                     <h3 class="forgot-title">Recover admin password</h3>
-                    <p class="forgot-note">Use the admin Gmail account to recover the password for the admin role.</p>
-                    @using (Html.BeginForm("AdminForgotPassword", "Account", FormMethod.Post))
+                    <p class="forgot-note">Enter your admin email, request an OTP, then set a new password.</p>
+                    @using (Html.BeginForm("AdminForgotPassword", "Account", FormMethod.Post, new { id = "adminForgotForm" }))
                     {
                         @Html.AntiForgeryToken()
                         <div class="role-form-grid">
                             <div class="role-field">
                                 <label>Admin Gmail Account</label>
-                                <input type="email" name="email" placeholder="Enter admin Gmail account" required />
+                                <input type="email" id="adminForgotEmail" name="email" placeholder="Enter admin Gmail account" required />
+                            </div>
+                            <div class="role-field">
+                                <label>Send OTP</label>
+                                <button class="role-submit" type="button" id="adminSendOtpBtn">Send OTP</button>
+                            </div>
+                            <div class="role-field" style="grid-column:1 / -1;">
+                                <div id="adminOtpStatus" class="otp-status" aria-live="polite"></div>
+                            </div>
+                            <div class="role-field">
+                                <label>OTP</label>
+                                <input type="text" name="otp" placeholder="Enter otp" required maxlength="6" inputmode="numeric" autocomplete="one-time-code" />
                             </div>
                             <div class="role-field">
                                 <label>New Password</label>
-                            <input type="password" name="newPassword" placeholder="Enter new password" required pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Use 8+ chars with uppercase, lowercase, number and special character." />
+                                <input type="password" name="newPassword" placeholder="Enter new password" required pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Use 8+ chars with uppercase, lowercase, number and special character." />
                             </div>
                             <div class="role-field" style="grid-column:1 / -1;">
                                 <label>Confirm New Password</label>
@@ -456,20 +467,38 @@
 
             fetch(config.sendUrl, {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: '__RequestVerificationToken=' + encodeURIComponent(token) + '&email=' + encodeURIComponent(email)
             })
-                .then(function (response) { return response.json(); })
+                .then(function (response) {
+                    return response.text().then(function (text) {
+                        var data = null;
+                        try {
+                            data = text ? JSON.parse(text) : null;
+                        } catch (parseError) {
+                            data = null;
+                        }
+
+                        if (!response.ok || !data) {
+                            var fallback = (data && data.message) ? data.message : (text || 'Unable to send OTP. Please try again.');
+                            throw new Error(fallback);
+                        }
+
+                        return data;
+                    });
+                })
                 .then(function (data) {
                     if (!statusEl) return;
                     statusEl.textContent = data.message || (data.success ? 'OTP sent.' : 'Unable to send OTP.');
                     statusEl.className = 'otp-status ' + (data.success ? 'success' : 'error');
                 })
-                .catch(function () {
+                .catch(function (err) {
                     if (statusEl) {
-                        statusEl.textContent = 'Unable to send OTP. Please try again.';
+                        statusEl.textContent = (err && err.message) ? err.message : 'Unable to send OTP. Please try again.';
                         statusEl.className = 'otp-status error';
                     }
                 })
@@ -496,6 +525,15 @@
         statusId: 'studentOtpStatus',
         emailRequiredMessage: 'Email is required to send OTP.',
         sendUrl: '@Url.Action("SendStudentPasswordResetOtp", "Account")'
+    });
+
+    setupPasswordResetOtp({
+        buttonId: 'adminSendOtpBtn',
+        formId: 'adminForgotForm',
+        emailInputId: 'adminForgotEmail',
+        statusId: 'adminOtpStatus',
+        emailRequiredMessage: 'Admin email is required to send OTP.',
+        sendUrl: '@Url.Action("SendAdminPasswordResetOtp", "Account")'
     });
 
     function clearFieldError(input) {

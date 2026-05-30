@@ -27,6 +27,10 @@ namespace EWasteDonationSystem.Models
         [Range(1, 1000000)]
         public decimal Price { get; set; }
 
+
+        [Range(0, 1000000)]
+        public decimal SalePrice { get; set; } = 0;
+
         [StringLength(80)]
         public string Category { get; set; }
 

@@ -41,9 +41,9 @@
     </section>
 
     <section>
-    <div class="hero-visual">
-        <img src="@Url.Content("~/Content/images/Home-Hero.jpeg")" alt="E-waste donation hero" />
-    </div>
+        <div class="hero-visual">
+            <img src="@Url.Content("~/Content/images/Home-Hero.jpeg")" alt="E-waste donation hero" />
+        </div>
     </section>
 
     <section class="landing-section" id="roles">
@@ -147,86 +147,198 @@
                     <strong>@ViewBag.DonorCount</strong>
                     <span>Registered Donors</span>
                 </div>
+                @*<div class="stat">
+                        <strong>@ViewBag.ItemCount</strong>
+                        <span>Total Donation Items</span>
+                    </div>*@
+                <div class="stat">
+                    <strong>@ViewBag.ApprovedDonorCount</strong>
+                    <span>Donation Approved Items</span>
+                </div>
+                <div class="stat">
+                    <strong>@ViewBag.PendingItems</strong>
+                    <span>Donation Pending Items</span>
+                </div>
+            </div>
+
+            <div class="hero-stats">
                 <div class="stat">
                     <strong>@ViewBag.StudentCount</strong>
-                    <span>Student Requests</span>
+                    <span>Registered Students</span>
                 </div>
                 <div class="stat">
-                    <strong>@ViewBag.ItemCount</strong>
-                    <span>Donation Items</span>
+                    <strong>@ViewBag.ApprovedStudentApplications</strong>
+                    <span>Approved Students Items</span>
                 </div>
+                <div class="stat">
+                    <strong>@ViewBag.PendingStudentApplications</strong>
+                    <span>Pending Students Items</span>
+                </div>
+            </div>
+
+            <div class="hero-charts">
+                <div class="chart-card">
+                    <h4>Donation Items</h4>
+                    <p class="chart-subtitle">Approved, pending, and rejected donation items</p>
+                    <div class="chart-wrap">
+                        <canvas id="donationItemsChart" aria-label="Donation approved and pending items bar chart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4>Student Items</h4>
+                    <p class="chart-subtitle">Approved, pending, and rejected student items</p>
+                    <div class="chart-wrap">
+                        <canvas id="studentItemsChart" aria-label="Student approved and pending items bar chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="landing-section">
+        <div class="section-head">
+            <div>
+                <h3>How the process works</h3>
+                <p>The system follows a simple flow from donation and application to approval, assignment, and support delivery.</p>
             </div>
         </div>
 
-    </section>   
-
-        <section class="landing-section">
-            <div class="section-head">
-                <div>
-                    <h3>How the process works</h3>
-                    <p>The system follows a simple flow from donation and application to approval, assignment, and support delivery.</p>
-                </div>
+        <div class="process-grid">
+            <div class="process-card">
+                <div class="process-number">01</div>
+                <h4>User enters the platform</h4>
+                <p>From the role page, each user selects donor, student, or admin and continues to the correct panel.</p>
             </div>
-
-            <div class="process-grid">
-                <div class="process-card">
-                    <div class="process-number">01</div>
-                    <h4>User enters the platform</h4>
-                    <p>From the role page, each user selects donor, student, or admin and continues to the correct panel.</p>
-                </div>
-                <div class="process-card">
-                    <div class="process-number">02</div>
-                    <h4>Details are submitted</h4>
-                    <p>Donation information and student requests are added through the system forms and stored properly.</p>
-                </div>
-                <div class="process-card">
-                    <div class="process-number">03</div>
-                    <h4>Admin reviews and manages</h4>
-                    <p>Admin can verify data, approve records, and assign pickup agents where needed.</p>
-                </div>
-                <div class="process-card">
-                    <div class="process-number">04</div>
-                    <h4>Useful devices reach impact</h4>
-                    <p>Electronic items are redirected toward reuse, reducing waste and increasing support for users.</p>
-                </div>
+            <div class="process-card">
+                <div class="process-number">02</div>
+                <h4>Details are submitted</h4>
+                <p>Donation information and student requests are added through the system forms and stored properly.</p>
             </div>
-        </section>
+            <div class="process-card">
+                <div class="process-number">03</div>
+                <h4>Admin reviews and manages</h4>
+                <p>Admin can verify data, approve records, and assign pickup agents where needed.</p>
+            </div>
+            <div class="process-card">
+                <div class="process-number">04</div>
+                <h4>Useful devices reach impact</h4>
+                <p>Electronic items are redirected toward reuse, reducing waste and increasing support for users.</p>
+            </div>
+        </div>
+    </section>
 
-        <section class="impact-panel">
-            <div class="impact-grid">
-                <div>
-                    <div class="section-head" style="margin-bottom:18px;">
-                        <div>
-                            <h3>Impact that your project can show</h3>
-                            <p>This section makes the home page look richer while still matching your project theme and existing content.</p>
-                        </div>
-                    </div>
-
-                    <div class="impact-boxes">
-                        <div class="impact-box">
-                            <h4>Cleaner environment</h4>
-                            <p>Promotes reuse and helps lower unnecessary electronic waste in the community.</p>
-                        </div>
-                        <div class="impact-box">
-                            <h4>Better accessibility</h4>
-                            <p>Gives students and needy persons a better chance to receive useful devices.</p>
-                        </div>
-                        <div class="impact-box">
-                            <h4>Professional presentation</h4>
-                            <p>Improves the visual quality of your FYP so the first page feels polished and complete.</p>
-                        </div>
-                        <div class="impact-box">
-                            <h4>Easy navigation</h4>
-                            <p>Guides users toward the next step with clear actions and role-based entry points.</p>
-                        </div>
+    <section class="impact-panel">
+        <div class="impact-grid">
+            <div>
+                <div class="section-head" style="margin-bottom:18px;">
+                    <div>
+                        <h3>Impact that your project can show</h3>
+                        <p>This section makes the home page look richer while still matching your project theme and existing content.</p>
                     </div>
                 </div>
 
-
+                <div class="impact-boxes">
+                    <div class="impact-box">
+                        <h4>Cleaner environment</h4>
+                        <p>Promotes reuse and helps lower unnecessary electronic waste in the community.</p>
+                    </div>
+                    <div class="impact-box">
+                        <h4>Better accessibility</h4>
+                        <p>Gives students and needy persons a better chance to receive useful devices.</p>
+                    </div>
+                    <div class="impact-box">
+                        <h4>Professional presentation</h4>
+                        <p>Improves the visual quality of your FYP so the first page feels polished and complete.</p>
+                    </div>
+                    <div class="impact-box">
+                        <h4>Easy navigation</h4>
+                        <p>Guides users toward the next step with clear actions and role-based entry points.</p>
+                    </div>
+                </div>
             </div>
-        </section>
+
+
+        </div>
+    </section>
 
 
 
-        <div class="landing-footer">© E-Waste Pickup and Donations System</div>
+    <div class="landing-footer">© E-Waste Pickup and Donations System</div>
 </div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            if (typeof Chart === 'undefined') return;
+
+            var chartDefaults = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        padding: 12,
+                        cornerRadius: 10
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#475569', font: { weight: '600', size: 12 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#64748b',
+                            precision: 0,
+                            stepSize: 1
+                        },
+                        grid: { color: 'rgba(15,23,42,.06)' }
+                    }
+                }
+            };
+
+            var donationCanvas = document.getElementById('donationItemsChart');
+            if (donationCanvas) {
+                new Chart(donationCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Donation Approved Items', 'Donation Pending Items', 'Donation Rejected Items'],
+                        datasets: [{
+                            data: [@ViewBag.ApprovedDonorCount, @ViewBag.PendingItems, @ViewBag.RejectedDonationItems],
+                            backgroundColor: ['rgba(45,212,191,.85)', 'rgba(96,165,250,.85)', 'rgba(248,113,113,.85)'],
+                            borderColor: ['#14b8a6', '#3b82f6', '#ef4444'],
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            maxBarThickness: 72
+                        }]
+                    },
+                    options: chartDefaults
+                });
+            }
+
+            var studentCanvas = document.getElementById('studentItemsChart');
+            if (studentCanvas) {
+                new Chart(studentCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Approved Students Items', 'Pending Students Items', 'Rejected Students Items'],
+                        datasets: [{
+                            data: [@ViewBag.ApprovedStudentApplications, @ViewBag.PendingStudentApplications, @ViewBag.RejectedStudentApplications],
+                            backgroundColor: ['rgba(167,139,250,.85)', 'rgba(251,191,36,.85)', 'rgba(248,113,113,.85)'],
+                            borderColor: ['#8b5cf6', '#f59e0b', '#ef4444'],
+                            borderWidth: 1,
+                            borderRadius: 10,
+                            maxBarThickness: 72
+                        }]
+                    },
+                    options: chartDefaults
+                });
+            }
+        })();
+    </script>
+}

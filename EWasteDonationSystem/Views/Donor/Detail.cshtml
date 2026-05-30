@@ -37,7 +37,7 @@
             </div>
             <div class="detail-card-body detail-profile-grid">
                 <div class="profile-field"><label>Donor Name</label><strong>@donor.FullName</strong></div>
-                <div class="profile-field"><label>Phone</label><strong>@(string.IsNullOrWhiteSpace(donor.Phone) ? "—" : donor.Phone)</strong></div>
+                <div class="profile-field"><label>Phone</label><strong>@(string.IsNullOrWhiteSpace(donor.UserName) ? "—" : donor.UserName)</strong></div>
                 <div class="profile-field"><label>Email</label><strong>@(string.IsNullOrWhiteSpace(donor.Email) ? "—" : donor.Email)</strong></div>
                 <div class="profile-field"><label>City</label><strong>@(string.IsNullOrWhiteSpace(donor.City) ? "—" : donor.City)</strong></div>
                 <div class="profile-field full"><label>Address</label><strong>@(string.IsNullOrWhiteSpace(donor.Address) ? "—" : donor.Address)</strong></div>
